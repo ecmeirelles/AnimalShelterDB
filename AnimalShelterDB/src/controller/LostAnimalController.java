@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import application.LostAnimalView;
 import application.Main;
+import connection.ConnectionDB;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -19,12 +20,16 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import model.Animal;
 import model.AnimalList;
+import model.Category;
+import model.LostAnimal;
+import model.Person;
 
 public class LostAnimalController extends ActionEvent implements EventHandler<ActionEvent> {
 	private static final long serialVersionUID = 1L;
 	ShelterFile file = new ShelterFile();
 	AnimalList animalList = new AnimalList();
 	LostAnimalView lostAnimalView;
+	ConnectionDB connection = new ConnectionDB();
 	
 	String animalID, animalName, animalBreed, animalAge, animalColour, animalDescription, animalLocation, animalType;
 	String ownerName, ownerEmail, ownerTelephone, ownerAddress;
@@ -99,18 +104,40 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 			}
 			
 			else {
-				animalList = file.getListFromFile("All");
+				/*animalList = file.getListFromFile("All");*/
 					
 				if(!animalList.searchAnimal(Integer.parseInt(animalID)) && !file.searchAnimalIdByPerson(Integer.parseInt(animalID))) {
 					RadioButton gender = (RadioButton) animalGender;
 					
-					file.writeInFile("OwnerContact.txt", "Lost" + "\t" + animalID + "\t" + ownerName + "\t" + ownerTelephone + "\t" 
+					/*file.writeInFile("OwnerContact.txt", "Lost" + "\t" + animalID + "\t" + ownerName + "\t" + ownerTelephone + "\t" 
 							+ ownerEmail + "\t" + ownerAddress);
 					
 					file.writeInFile("Animal.txt", "Lost" + "\t" + animalID + "\t" + animalName + "\t" + animalType + "\t" 
 						+ animalBreed + "\t" + animalAge + "\t" + gender.getText() + "\t" + animalColour + "\t" 
 						+ animalDescription + "\t" + animalDate + "\t" + animalLocation);
-						
+					*/
+					
+					Animal animal = new Animal();
+					animal.setAnimalId(Integer.parseInt(animalID));
+					animal.setAnimalAge(Integer.parseInt(animalAge));
+					animal.setAnimalBreed(animalBreed);
+					animal.setAnimalColour(animalColour);
+					animal.setAnimalDescription(animalDescription);
+					animal.setAnimalGender(gender.getText());
+					animal.setAnimalName(animalName);
+					animal.setAnimalType(animalType);
+					
+					Person owner = new Person();
+					owner.setPersonName(ownerName);
+					owner.setPersonAddress(ownerAddress);
+					owner.setPersonEmail(ownerEmail);
+					owner.setPersonPhone(ownerTelephone);
+					
+					Category category = new LostAnimal(animalDate, owner, animalLocation);
+            		animal.setAnimalCategory(category);
+            		
+            		connection.addPerson(owner);
+					
 					Alert alert = new Alert(AlertType.INFORMATION);
 					alert.setHeaderText(null);
 					alert.setContentText("Animal added successfully!");

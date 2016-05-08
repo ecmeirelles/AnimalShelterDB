@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import connection.ConnectionDB;
 import controller.ShelterFile;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -28,6 +29,7 @@ import model.AnimalList;
 public class Main extends Application {
 	private static Stage stage;
 	private static Scene scene;
+	private ConnectionDB connection;
 	private ShelterFile file = new ShelterFile();
 
 	private BorderPane root;
@@ -48,9 +50,13 @@ public class Main extends Application {
 			root = new BorderPane();
 			scene = new Scene(root, 1000, 800);
 			
+			connection = new ConnectionDB();
+			
 			file.copyAFile("Animal.dat", "Animal.txt");
 			file.copyAFile("OwnerContact.dat", "OwnerContact.txt");
 			file.copyAFile("InterestAdopting.dat", "InterestAdopting.txt");
+			
+			
 			
 			DisplayMenu displayMenu = new DisplayMenu();
 			displayMenu.menu();
