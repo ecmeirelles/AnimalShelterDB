@@ -25,8 +25,6 @@ import model.Category;
 import model.FoundAnimal;
 
 public class FoundAnimalController implements EventHandler<ActionEvent>{
-	ShelterFile file = new ShelterFile();
-	AnimalList animalList = new AnimalList();
 	FoundAnimalView foundAnimalView;
 	
 	String animalID, animalName, animalBreed, animalAge, animalColour, animalDescription, animalLocation, animalType;
@@ -189,27 +187,20 @@ public class FoundAnimalController implements EventHandler<ActionEvent>{
 			foundAnimalView.getOwnerAddress().setVisible(true);
 			foundAnimalView.getActionButtons().setVisible(true);
 			
-			try {
-				animalList = file.getListFromFile("All");
-			} catch (FileNotFoundException e) {
-				System.out.println("File couldn't be found!");
-			} catch (IOException e) {
-				System.out.println("I/O Problem!");
-			}
-			int index = animalList.getIndexBySearch(Integer.parseInt(foundAnimalView.getAnimalSearchField().getText()));
+			Animal animal = Main.getConnection().searchAnimalById("Found", Integer.parseInt(foundAnimalView.getAnimalSearchField().getText()));
 			
-			if(index != -1) {
-				String animalType = animalList.getAnimalList().get(index).getAnimalType();
-				String animalGender = animalList.getAnimalList().get(index).getAnimalGender();
+			if(animal != null) {
+				String animalType = animal.getAnimalType();
+				String animalGender = animal.getAnimalGender();
 				
-				foundAnimalView.getAnimalIdField().setText(String.valueOf(animalList.getAnimalList().get(index).getAnimalId()));
-				foundAnimalView.getAnimalNameField().setText(animalList.getAnimalList().get(index).getAnimalName());
-				foundAnimalView.getAnimalBreedField().setText(animalList.getAnimalList().get(index).getAnimalBreed());
-				foundAnimalView.getAnimalAgeField().setText(String.valueOf(animalList.getAnimalList().get(index).getAnimalAge()));
-				foundAnimalView.getAnimalColourField().setText(animalList.getAnimalList().get(index).getAnimalColour());
-				foundAnimalView.getAnimalDescriptionArea().setText(animalList.getAnimalList().get(index).getAnimalDescription());
-				foundAnimalView.getAnimalDateField().setValue(animalList.getAnimalList().get(index).getAnimalCategory().getDate());
-				foundAnimalView.getAnimalLocationField().setText(animalList.getAnimalList().get(index).getAnimalCategory().getLocation());
+				foundAnimalView.getAnimalIdField().setText(String.valueOf(animal.getAnimalId()));
+				foundAnimalView.getAnimalNameField().setText(animal.getAnimalName());
+				foundAnimalView.getAnimalBreedField().setText(animal.getAnimalBreed());
+				foundAnimalView.getAnimalAgeField().setText(String.valueOf(animal.getAnimalAge()));
+				foundAnimalView.getAnimalColourField().setText(animal.getAnimalColour());
+				foundAnimalView.getAnimalDescriptionArea().setText(animal.getAnimalDescription());
+				foundAnimalView.getAnimalDateField().setValue(animal.getAnimalCategory().getDate());
+				foundAnimalView.getAnimalLocationField().setText(animal.getAnimalCategory().getLocation());
 				
 				if(animalGender.equalsIgnoreCase("Female")) {
 					foundAnimalView.getFemaleAnimal().setSelected(true);

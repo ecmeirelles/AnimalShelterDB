@@ -412,4 +412,89 @@ public class ConnectionDB {
 		
 		return details;
 	}
+	
+	public Animal searchAnimalById(String category, int id) {
+		Animal animal = new Animal();
+		
+		try {
+			PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idAnimal = ?;");
+			selectAnimal.setInt(1, id);
+			ResultSet resultAnimal = selectAnimal.executeQuery();			
+				
+			if(resultAnimal.next()) {
+				String location = "";
+				int idCategory = 0;
+					
+				animal.setAnimalId(resultAnimal.getInt("idAnimal"));
+				animal.setAnimalAge(resultAnimal.getInt("animalAge"));
+				animal.setAnimalType(resultAnimal.getString("animalType"));
+				animal.setAnimalColour(resultAnimal.getString("animalColour"));
+				animal.setAnimalGender(resultAnimal.getString("animalGender"));
+				animal.setAnimalDescription(resultAnimal.getString("animalDescription"));
+				animal.setAnimalName(resultAnimal.getString("animalName"));
+				animal.setAnimalBreed(resultAnimal.getString("animalBreed"));
+				
+				idCategory = resultAnimal.getInt("idCategory");
+					
+				if(category.equalsIgnoreCase("Lost")) {
+					PreparedStatement selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ?;");
+					selectLost.setInt(1, idCategory);
+					ResultSet resultLost = selectLost.executeQuery();
+					
+					if(resultLost.next()) {						
+						location = resultLost.getString("lostLocation");
+					}
+					
+					else {
+						animal = null;
+					}
+				}
+					
+				else if(category.equalsIgnoreCase("Found")) {
+					PreparedStatement selectFound = connection.prepareStatement("SELECT * FROM animal_shelter.found WHERE idCategory = ?;");
+					selectFound.setInt(1, idCategory);
+					ResultSet resultFound = selectFound.executeQuery();
+					
+					if(resultFound.next()) {						
+						location = resultFound.getString("foundLocation");
+					}
+					
+					else {
+						animal = null;
+					}
+				}
+						
+				PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ?;");
+				selectCategory.setInt(1, idCategory);
+				ResultSet resultCategory = selectCategory.executeQuery();
+						
+				if(resultCategory.next()) {
+					if(category.equalsIgnoreCase("Lost")) {
+						if(animal != null) {
+							Category animalCategory = new LostAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
+								searchPersonLinkedToAnimal(idCategory), location);
+							animal.setAnimalCategory(animalCategory);
+						}
+					}
+						
+					else if(category.equalsIgnoreCase("Found")) {
+						if(animal != null) {
+							Category animalCategory = new FoundAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
+								searchPersonLinkedToAnimal(idCategory), location);
+							animal.setAnimalCategory(animalCategory);
+						}
+					}
+				}		
+			}
+			
+			else {
+				animal = null;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return animal;
+	}
 }

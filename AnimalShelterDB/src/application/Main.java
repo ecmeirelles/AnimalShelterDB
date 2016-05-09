@@ -1,17 +1,11 @@
 package application;
 
-import java.util.Optional;
-
 import connection.ConnectionDB;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -63,28 +57,9 @@ public class Main extends Application {
 			
 			//TODO: Transferencia
 			
-			//TODO: Revisar essa parte
-			
 			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 		          public void handle(WindowEvent we) {
 		        	connection.closeConnection();
-		        	  
-		        	Alert alert = new Alert(AlertType.CONFIRMATION);
-		  			alert.setHeaderText(null);
-		  			alert.setContentText("Information will not be kept. \nDo you want to save?");
-		  			
-		  			ButtonType yes = new ButtonType("Yes", ButtonData.YES);
-		  			ButtonType no = new ButtonType("No", ButtonData.NO);
-
-		  			alert.getButtonTypes().setAll(yes, no);
-
-
-		  			Optional<ButtonType> result = alert.showAndWait();
-			
-					//TODO: Metodo para nao salvar
-					if(result.get() == no){
-						
-			  		}
 		          }
 		      });        
 			
