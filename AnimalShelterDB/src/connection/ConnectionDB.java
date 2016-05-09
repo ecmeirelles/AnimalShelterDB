@@ -17,7 +17,6 @@ public class ConnectionDB {
 	public ConnectionDB() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			System.out.println("Connecting to database...");
 			connection = DriverManager.getConnection(URL, USER, PASSWORD);
 		} 
 		
@@ -59,7 +58,9 @@ public class ConnectionDB {
 		}		
 	}
 	
-	public void addAnimal(Animal animal, String category) {
+	public int searchIdPersonLinkToAnimal(Animal animal) {
+		int idPerson = 0;
+	
 		try {
 			PreparedStatement selectPerson = connection.prepareStatement("SELECT idPerson FROM animal_shelter.person WHERE personPhone = ? AND personName = ?;");
 			selectPerson.setString(1, animal.getAnimalCategory().getEmergencyContact().getPersonPhone());
@@ -67,30 +68,60 @@ public class ConnectionDB {
 			
 			ResultSet resultPerson = selectPerson.executeQuery();
 			
-			int idPerson = 0;
 			if(resultPerson.next()) {
 				idPerson = resultPerson.getInt("idPerson");
 			}
 			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return idPerson;
+	}
+	
+	public void addCategory(Animal animal) {
+		
+		try {
+			PreparedStatement insertCategory = connection.prepareStatement("INSERT INTO animal_shelter.category " + "VALUES (?, ?, ?);");
+			
+			int valueCategory = random.nextInt(10000);
+			insertCategory.setInt(1, valueCategory);
+			insertCategory.setDate(2, Date.valueOf(animal.getAnimalCategory().getDate()));
+			insertCategory.setInt(3, searchIdPersonLinkToAnimal(animal));
+			insertCategory.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}			
+	}
+	
+	public int searchAnimalCategory(Animal animal) {
+		int idCategory = 0;
+		
+		try {
+			PreparedStatement selectCategory = connection.prepareStatement("SELECT idCategory FROM animal_shelter.category WHERE idPerson = ?;");
+			selectCategory.setInt(1, searchIdPersonLinkToAnimal(animal));
+			ResultSet resultCategory = selectCategory.executeQuery();			
+			
+			if(resultCategory.next()) {
+				idCategory = resultCategory.getInt("idCategory");
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return idCategory;
+	}
+	
+	public void addAnimal(Animal animal, String category) {
+		try {
+			int idPerson = searchIdPersonLinkToAnimal(animal);
+			
 			if(idPerson != 0) {
-				PreparedStatement insertCategory = connection.prepareStatement("INSERT INTO animal_shelter.category " + "VALUES (?, ?, ?);");
-				
-				int valueCategory = random.nextInt(10000);
-				insertCategory.setInt(1, valueCategory);
-				insertCategory.setDate(2, Date.valueOf(animal.getAnimalCategory().getDate()));
-				insertCategory.setInt(3, idPerson);			
-				insertCategory.executeUpdate();
-				
-				PreparedStatement selectCategory = connection.prepareStatement("SELECT idCategory FROM animal_shelter.category WHERE idPerson = ?;");
-				selectCategory.setInt(1, idPerson);
-				
-				ResultSet resultCategory = selectCategory.executeQuery();
-				
-				int idCategory = 0;
-				if(resultCategory.next()) {
-					idCategory = resultCategory.getInt("idCategory");
-				}
-				
+				addCategory(animal);
+				int idCategory = searchAnimalCategory(animal);
+								
 				if(idCategory != 0) {
 					PreparedStatement insertSituation = null;
 					int valueSituation = random.nextInt(10000);
@@ -119,7 +150,7 @@ public class ConnectionDB {
 						insertSituation.setBoolean(4, animal.getAnimalCategory().isChipped());
 						insertSituation.setString(5, animal.getAnimalCategory().getStatus());
 						insertSituation.setBoolean(6, animal.getAnimalCategory().isReserved());
-						insertCategory.setInt(7, idCategory);			
+						insertSituation.setInt(7, idCategory);			
 						insertSituation.executeUpdate();
 					}
 					
