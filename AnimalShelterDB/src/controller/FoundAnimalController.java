@@ -322,34 +322,17 @@ public class FoundAnimalController implements EventHandler<ActionEvent>{
 		}
 		
 		else {
-			try {
-				animalList = file.getListFromFile("All");
-			} catch (FileNotFoundException e1) {
-				System.out.println("File couldn't be found!");
-			} catch (IOException e1) {
-				System.out.println("I/O Problem!");
-			}
-			
-			if(animalList.searchAnimal(Integer.parseInt(animalID))) {
-				try {							
-					file.fromLostToFound(Integer.parseInt(animalID), String.valueOf(animalDate), animalLocation);
-					
-							
-					Alert information = new Alert(AlertType.INFORMATION);
-					information.setHeaderText(null);
-					information.setContentText("Animal added as found successfully!");
-					information.showAndWait();
-							
-					foundAnimalView.getAnimalSearchField().setText("");
-					foundAnimalView.getAnimalDateField().setValue(null);
-					foundAnimalView.getAnimalLocationField().setText("");
-				}
+			if(Main.getConnection().searchAnimalId(Integer.parseInt(animalID))) {
 				
-				catch (NumberFormatException e) {
-					System.out.println("Animal ID is not an integer");
-				} catch (IOException e) {
-					System.out.println("I/O Problem!");
-				} 
+				Main.getConnection().fromLostToFound(Integer.parseInt(animalID), animalLocation, animalDate);
+				Alert information = new Alert(AlertType.INFORMATION);
+				information.setHeaderText(null);
+				information.setContentText("Animal added as found successfully!");
+				information.showAndWait();
+							
+				foundAnimalView.getAnimalSearchField().setText("");
+				foundAnimalView.getAnimalDateField().setValue(null);
+				foundAnimalView.getAnimalLocationField().setText("");
 			}
 			
 			else {

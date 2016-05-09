@@ -549,4 +549,37 @@ public class ConnectionDB {
 			e.printStackTrace();
 		}
 	}
+
+	public void fromLostToFound(int id, String location, LocalDate date) {
+		try {
+			PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idAnimal = ?;");
+			selectAnimal.setInt(1, id);
+			ResultSet resultAnimal = selectAnimal.executeQuery();			
+				
+			if(resultAnimal.next()) {
+				int idCategory = getIdCategoryByIdAnimal(id);
+				
+				PreparedStatement selectLost = connection.prepareStatement("DELETE FROM animal_shelter.lost WHERE idCategory = ?;");
+				selectLost.setInt(1, idCategory);
+				selectLost.execute();
+				
+				PreparedStatement selectCategory = connection.prepareStatement("UPDATE animal_shelter.category SET categoryDate = ? WHERE idCategory = ?;");
+				selectCategory.setDate(1, Date.valueOf(date));
+				selectCategory.setInt(2, idCategory);
+				selectCategory.executeUpdate();
+				
+				PreparedStatement insertFound = connection.prepareStatement("INSERT INTO animal_shelter.found " + "VALUES (?, ?, ?);");
+				
+				int value = random.nextInt(10000);				
+				insertFound.setInt(1, value);
+				insertFound.setString(2, location);
+				insertFound.setInt(3, idCategory);
+				
+				insertFound.executeUpdate();
+			}
+		
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }
