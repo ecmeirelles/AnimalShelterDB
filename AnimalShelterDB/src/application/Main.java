@@ -1,9 +1,5 @@
 package application;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -29,7 +25,7 @@ import model.AnimalList;
 public class Main extends Application {
 	private static Stage stage;
 	private static Scene scene;
-	private ConnectionDB connection;
+	private static ConnectionDB connection;
 	private ShelterFile file = new ShelterFile();
 
 	private BorderPane root;
@@ -52,12 +48,6 @@ public class Main extends Application {
 			
 			connection = new ConnectionDB();
 			
-			file.copyAFile("Animal.dat", "Animal.txt");
-			file.copyAFile("OwnerContact.dat", "OwnerContact.txt");
-			file.copyAFile("InterestAdopting.dat", "InterestAdopting.txt");
-			
-			
-			
 			DisplayMenu displayMenu = new DisplayMenu();
 			displayMenu.menu();
 			root.setTop(displayMenu.getMenuBar());
@@ -75,48 +65,9 @@ public class Main extends Application {
 			primaryStage.setScene(scene);
 			primaryStage.show();
 			
-			AnimalList animalList = file.getListFromFile("Found");	
-			for(int i =0; i < animalList.getAnimalList().size(); i++) {
-				if(LocalDate.now().minusMonths(1).equals(animalList.getAnimalList().get(i).getAnimalCategory().getDate())) {
-					Alert alert = new Alert(AlertType.CONFIRMATION);
-					alert.setHeaderText("Transference Available");
-					alert.setContentText("The animal " + animalList.getAnimalList().get(i).getAnimalId() + " is available for transference to Adoption");
-
-					ButtonType goToTransference = new ButtonType("Transfer");
-					ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-					alert.getButtonTypes().setAll(goToTransference, cancel);
-
-					Optional<ButtonType> result = alert.showAndWait();
-					if (result.get() == goToTransference){
-						AnimalAdoptionView animalAdoption = new AnimalAdoptionView(new BorderPane(), 1000, 800, "ADD");
-						primaryStage.setScene(animalAdoption);
-					} 
-				}
-			}
+			//TODO: Transferencia
 			
-			AnimalList adoptionList = file.getListFromFile("Adoption");
-			for(int i =0; i < adoptionList.getAnimalList().size(); i++) {
-				if(adoptionList.getAnimalList().get(i).getAnimalCategory().isChipped() && 
-						adoptionList.getAnimalList().get(i).getAnimalCategory().isNeutered() &&
-						adoptionList.getAnimalList().get(i).getAnimalCategory().isVaccinated() &&
-						adoptionList.getAnimalList().get(i).getAnimalCategory().getStatus().equalsIgnoreCase("Ready") &&
-						adoptionList.getAnimalList().get(i).getAnimalCategory().isReserved()) {
-					
-					Alert alert = new Alert(AlertType.CONFIRMATION);
-					alert.setHeaderText("Animal Ready");
-					alert.setContentText("The animal " + adoptionList.getAnimalList().get(i).getAnimalId() + " is ready to go home");
-
-					ButtonType pickAnimalUp = new ButtonType("Pick Animal Up");
-					ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-					alert.getButtonTypes().setAll(pickAnimalUp, cancel);
-
-					Optional<ButtonType> result = alert.showAndWait();
-					if (result.get() == pickAnimalUp){
-						AnimalAdoptionView animalAdoption = new AnimalAdoptionView(new BorderPane(), 1000, 800, "Remove");
-						primaryStage.setScene(animalAdoption);
-					} 
-				}
-			}
+			//TODO: Revisar essa parte
 			
 			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 		          public void handle(WindowEvent we) {
@@ -133,37 +84,11 @@ public class Main extends Application {
 
 
 		  			Optional<ButtonType> result = alert.showAndWait();
-		  			try {
-		  				Path animalTemporary = Paths.get("Animal.txt");
-						Path ownerTemporary = Paths.get("OwnerContact.txt");
+			
+					//TODO: Metodo para nao salvar
+					if(result.get() == no){
 						
-						Path animalSource = Paths.get("Animal.dat");
-						Path ownerSource = Paths.get("OwnerContact.dat");
-						
-						Path personSource = Paths.get("InterestAdopting.dat");
-						Path personTemporary = Paths.get("InterestAdopting.txt");
-						
-		  				if (result.get() == yes){
-			  		        Files.delete(animalSource);
-			  		        Files.move(animalTemporary, animalTemporary.resolveSibling(animalSource));
-			  		        
-			  		        Files.delete(ownerSource);
-			  		        Files.move(ownerTemporary, ownerTemporary.resolveSibling(ownerSource));
-			  		        
-			  		        Files.delete(personSource);
-			  		        Files.move(personTemporary, personTemporary.resolveSibling(personSource));
-			  			}
-			  			
-			  			else if(result.get() == no){
-							Files.delete(animalTemporary);
-							Files.delete(ownerTemporary);
-							Files.delete(personTemporary);
-			  			}
-		  			}
-		  			
-		  			catch (IOException e) {
-						e.printStackTrace();
-					}
+			  		}
 		          }
 		      });        
 			
@@ -188,5 +113,9 @@ public class Main extends Application {
 
 	public static void setScene(Scene scene) {
 		Main.scene = scene;
+	}
+	
+	public static ConnectionDB getConnection() {
+		return connection;
 	}
 }

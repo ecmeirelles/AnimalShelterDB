@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import application.LostAnimalView;
 import application.Main;
-import connection.ConnectionDB;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -29,7 +28,6 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 	ShelterFile file = new ShelterFile();
 	AnimalList animalList = new AnimalList();
 	LostAnimalView lostAnimalView;
-	ConnectionDB connection = new ConnectionDB();
 	
 	String animalID, animalName, animalBreed, animalAge, animalColour, animalDescription, animalLocation, animalType;
 	String ownerName, ownerEmail, ownerTelephone, ownerAddress;
@@ -82,81 +80,67 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 
 	public void submit() {
 
-		try {
-			if(animalID.isEmpty() || animalType == "" || animalDate == null  || 
-					animalLocation.isEmpty() || animalDescription.isEmpty() || 
-					(!lostAnimalView.getFemaleAnimal().isSelected() && !lostAnimalView.getMaleAnimal().isSelected())) {
+		if(animalID.isEmpty() || animalType == "" || animalDate == null  || 
+				animalLocation.isEmpty() || animalDescription.isEmpty() || 
+				(!lostAnimalView.getFemaleAnimal().isSelected() && !lostAnimalView.getMaleAnimal().isSelected())) {
 				
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText("Empty Field!");
-				alert.setContentText("One or more of the following fields is empty. Please fill it."
-						+ "\n* ID \n* Type \n* Gender \n* Description \n* Date \n* Location");
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText("Empty Field!");
+			alert.setContentText("One or more of the following fields is empty. Please fill it."
+					+ "\n* ID \n* Type \n* Gender \n* Description \n* Date \n* Location");
 
-				alert.showAndWait();	
-			}
+			alert.showAndWait();	
+		}
 			
-			else if(ownerName.isEmpty() || ownerTelephone.isEmpty()) {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText("Empty Field!");
-				alert.setContentText("Owner name and/or telephone must not be empty.");
+		else if(ownerName.isEmpty() || ownerTelephone.isEmpty()) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText("Empty Field!");
+			alert.setContentText("Owner name and/or telephone must not be empty.");
 
+			alert.showAndWait();
+		}
+			
+		else {
+			// TODO: Conferir se id ja existe
+			if(!animalList.searchAnimal(Integer.parseInt(animalID))) {
+				RadioButton gender = (RadioButton) animalGender;
+				
+				Animal animal = new Animal();
+				animal.setAnimalId(Integer.parseInt(animalID));
+				animal.setAnimalAge(Integer.parseInt(animalAge));
+				animal.setAnimalBreed(animalBreed);
+				animal.setAnimalColour(animalColour);
+				animal.setAnimalDescription(animalDescription);
+				animal.setAnimalGender(gender.getText());
+				animal.setAnimalName(animalName);
+				animal.setAnimalType(animalType);
+					
+				Person owner = new Person();
+				owner.setPersonName(ownerName);
+				owner.setPersonAddress(ownerAddress);
+				owner.setPersonEmail(ownerEmail);
+				owner.setPersonPhone(ownerTelephone);
+					
+				Category category = new LostAnimal(animalDate, owner, animalLocation);
+           		animal.setAnimalCategory(category);
+           		
+           		Main.getConnection().addPerson(owner);
+           		Main.getConnection().addAnimal(animal, "Lost");
+				
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setHeaderText(null);
+				alert.setContentText("Animal added successfully!");
+				alert.showAndWait();
+						
+				clear();
+			}
+					
+			else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setHeaderText(null);
+				alert.setContentText("ID detected! Animal already exists.");
 				alert.showAndWait();
 			}
-			
-			else {
-				/*animalList = file.getListFromFile("All");*/
-					
-				if(!animalList.searchAnimal(Integer.parseInt(animalID)) && !file.searchAnimalIdByPerson(Integer.parseInt(animalID))) {
-					RadioButton gender = (RadioButton) animalGender;
-					
-					/*file.writeInFile("OwnerContact.txt", "Lost" + "\t" + animalID + "\t" + ownerName + "\t" + ownerTelephone + "\t" 
-							+ ownerEmail + "\t" + ownerAddress);
-					
-					file.writeInFile("Animal.txt", "Lost" + "\t" + animalID + "\t" + animalName + "\t" + animalType + "\t" 
-						+ animalBreed + "\t" + animalAge + "\t" + gender.getText() + "\t" + animalColour + "\t" 
-						+ animalDescription + "\t" + animalDate + "\t" + animalLocation);
-					*/
-					
-					Animal animal = new Animal();
-					animal.setAnimalId(Integer.parseInt(animalID));
-					animal.setAnimalAge(Integer.parseInt(animalAge));
-					animal.setAnimalBreed(animalBreed);
-					animal.setAnimalColour(animalColour);
-					animal.setAnimalDescription(animalDescription);
-					animal.setAnimalGender(gender.getText());
-					animal.setAnimalName(animalName);
-					animal.setAnimalType(animalType);
-					
-					Person owner = new Person();
-					owner.setPersonName(ownerName);
-					owner.setPersonAddress(ownerAddress);
-					owner.setPersonEmail(ownerEmail);
-					owner.setPersonPhone(ownerTelephone);
-					
-					Category category = new LostAnimal(animalDate, owner, animalLocation);
-            		animal.setAnimalCategory(category);
-            		
-            		connection.addPerson(owner);
-            		connection.addAnimal(animal, "Lost");
-					
-					Alert alert = new Alert(AlertType.INFORMATION);
-					alert.setHeaderText(null);
-					alert.setContentText("Animal added successfully!");
-					alert.showAndWait();
-						
-					clear();
-				}
-					
-				else {
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setHeaderText(null);
-					alert.setContentText("ID detected! Animal already exists.");
-					alert.showAndWait();
-				}
-			}
-			
-		} catch (IOException e) {
-			System.out.println("I/O Problem");
 		}
 	}
 	
