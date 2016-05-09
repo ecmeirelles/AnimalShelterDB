@@ -306,4 +306,59 @@ public class ConnectionDB {
 		
 		return details;
 	}
+	
+	public ObservableList<Animal> getLostAnimalsToReport(String category, String type, String location, LocalDate date) {
+		AnimalList animalList = new AnimalList();
+		ObservableList<Animal> details = FXCollections.observableArrayList();
+		
+		try {
+			ArrayList<Integer> categoryIds = getLostIds();		
+			
+			for(int i =0; i < categoryIds.size(); i++) {
+				PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idCategory = ?;");
+				selectAnimal.setInt(1, categoryIds.get(i));
+				ResultSet resultAnimal = selectAnimal.executeQuery();			
+				
+				if(resultAnimal.next()) {
+					PreparedStatement selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ? "
+							+ "AND lostLocation = ?;");
+					selectLost.setInt(1, categoryIds.get(i));
+					selectLost.setString(2, location);
+					ResultSet resultLost = selectLost.executeQuery();
+					
+					Animal animal = new Animal();
+					
+					if(resultLost.next()) {														
+						animal.setAnimalId(resultAnimal.getInt("idAnimal"));
+						animal.setAnimalAge(resultAnimal.getInt("animalAge"));
+						animal.setAnimalType(resultAnimal.getString("animalType"));
+						animal.setAnimalColour(resultAnimal.getString("animalColour"));
+						animal.setAnimalGender(resultAnimal.getString("animalGender"));
+						animal.setAnimalDescription(resultAnimal.getString("animalDescription"));
+						animal.setAnimalName(resultAnimal.getString("animalName"));
+						animal.setAnimalBreed(resultAnimal.getString("animalBreed"));
+			
+						PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ?;");
+						selectCategory.setInt(1, categoryIds.get(i));
+						ResultSet resultCategory = selectCategory.executeQuery();
+							
+						if(resultCategory.next()) {
+							Category animalCategory = new LostAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
+									searchPersonLinkedToAnimal(categoryIds.get(i)), location);
+							animal.setAnimalCategory(animalCategory);
+						}
+						
+						animalList.addAnimal(animal);
+					}		
+				}
+			}
+			
+			details.addAll(animalList.getAnimalList());
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return details;
+	}
 }

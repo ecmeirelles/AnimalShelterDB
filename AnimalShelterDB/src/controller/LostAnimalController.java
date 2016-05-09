@@ -25,7 +25,6 @@ import model.Person;
 
 public class LostAnimalController extends ActionEvent implements EventHandler<ActionEvent> {
 	private static final long serialVersionUID = 1L;
-	ShelterFile file = new ShelterFile();
 	AnimalList animalList = new AnimalList();
 	LostAnimalView lostAnimalView;
 	
@@ -189,9 +188,8 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 	}
 	
 	public void generateReport() {
-		ObservableList<Animal> details = FXCollections.observableArrayList();
-		
-		try {
+		ObservableList<Animal> details = Main.getConnection().getLostAnimalsToReport("Lost", animalType, animalLocation, animalDate);
+
 			if(animalDate == null && animalLocation.isEmpty() && animalType == null) {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setHeaderText(null);
@@ -200,9 +198,7 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 			}
 			
 			else {
-				animalList = file.getListToReport("Lost", animalType, animalDate, null, animalLocation);
-				
-				if(animalList.getAnimalList().size() == 0) {
+				if(details.isEmpty()) {
 					lostAnimalView.getAnimalDetails().setVisible(false);
 					
 					Alert alert = new Alert(AlertType.ERROR);
@@ -212,7 +208,6 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 				}
 				
 				else {
-					details.addAll(animalList.getAnimalList());
 					
 					lostAnimalView.getIdColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalId()));
 				    lostAnimalView.getNameColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalName()));
@@ -229,9 +224,5 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 				    lostAnimalView.getAnimalDetails().setVisible(true);
 				}
 			}
-		    
-		} catch (IOException e) {
-			System.out.println("I/O Problem");
-		}
 	}
 }
