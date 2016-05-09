@@ -1,12 +1,10 @@
 package application;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import controller.AnimalAdoptionController;
-import controller.ShelterFile;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -33,7 +31,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.util.StringConverter;
 import model.Animal;
-import model.AnimalList;
 import model.Person;
 
 public class AnimalAdoptionView extends Scene {
@@ -569,38 +566,29 @@ public class AnimalAdoptionView extends Scene {
 	    
 	    animalIdLabel = new Label("Animal ID:");
 	    
-	    try {
-			AnimalList animalList = new ShelterFile().getListFromFile("Adoption");
-			ObservableList<String> ids = FXCollections.observableArrayList();
+	    ArrayList<Integer> animalIdList = Main.getConnection().getAdoptionAnimalIds();
+		ObservableList<String> ids = FXCollections.observableArrayList();
 
-			for(int i = 0; i < animalList.getAnimalList().size(); i++) {
-				ids.add(String.valueOf(animalList.getAnimalList().get(i).getAnimalId()));
-			}
-			
-			adoptionIds = new ComboBox<>(ids);
-			
-		} catch (IOException e) {
-			System.out.println("I/O Problem");
+		for(int i = 0; i < animalIdList.size(); i++) {
+			ids.add(String.valueOf(animalIdList.get(i)));
 		}
+			
+		adoptionIds = new ComboBox<>(ids);
 	    
 	    Label allocateTo = new Label("allocate to");	    
 	    
 	    personNameLabel = new Label("Person's Name:");
 	    
-	    try {
-			ArrayList<Person> personList = new ShelterFile().getInterestedPeopleFromFile();
-			ObservableList<String> names = FXCollections.observableArrayList();
+		ArrayList<Person> personList = Main.getConnection().getInterestAdoptionPeople();
+		ObservableList<String> names = FXCollections.observableArrayList();
 
-			for(int i = 0; i < personList.size(); i++) {
-				names.add(personList.get(i).getPersonName());
-			}
-			
-			adoptionNames = new ComboBox<>(names);
-			adoptionNames.setMinWidth(300);
-			
-		} catch (IOException e) {
-			System.out.println("I/O Problem");
+		for(int i = 0; i < personList.size(); i++) {
+			names.add(personList.get(i).getPersonName());
 		}
+			
+		adoptionNames = new ComboBox<>(names);
+		adoptionNames.setMinWidth(300);
+
 	    animalIdName.getChildren().addAll(animalIdLabel, adoptionIds, allocateTo, personNameLabel, adoptionNames);
 
 	    allocateButton = new Button("Allocate");

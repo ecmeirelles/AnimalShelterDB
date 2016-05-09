@@ -1,7 +1,5 @@
 package controller;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -21,12 +19,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.Alert.AlertType;
 import model.Animal;
-import model.AnimalList;
 
 public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 	AnimalAdoptionView animalAdoptionView;
-	ShelterFile file = new ShelterFile();
-	AnimalList animalList = new AnimalList();
 	
 	String animalID, animalName, animalBreed, animalAge, animalColour, animalDescription, animalLocation, animalType, animalStatus,
 		   personName, personEmail, personTelephone, personAddress;
@@ -128,38 +123,35 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 		}
 			
 		else {
-			try {
-				animalList = file.getListFromFile("Found");
-				int index = animalList.getIndexBySearch(Integer.parseInt(animalID));
+			LocalDate foundDate = Main.getConnection().getDatefromAnimal(Integer.parseInt(animalID));
 
-				if(LocalDate.now().minusMonths(1).equals(animalList.getAnimalList().get(index).getAnimalCategory().getDate()) ||
-						LocalDate.now().minusMonths(1).isAfter(animalList.getAnimalList().get(index).getAnimalCategory().getDate())) {
-						
-					RadioButton chipped = (RadioButton)animalChipped;
-					RadioButton neutered = (RadioButton)animalNeutered;
-					RadioButton vaccinated = (RadioButton)animalVaccinated;
-
-					file.fromFoundToAdoption(Integer.parseInt(animalID), animalName, chipped.getText(), neutered.getText(), 
-							vaccinated.getText(), animalStatus, "Not Reserved");
-							
-					Alert alert = new Alert(AlertType.INFORMATION);
-					alert.setHeaderText(null);
-					alert.setContentText("Animal added to adoption successfully!");
-					alert.showAndWait();
-								
-					clear();
-				}
+			if(LocalDate.now().minusMonths(1).equals(foundDate) || LocalDate.now().minusMonths(1).isAfter(foundDate)) {
 					
-				else {
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setHeaderText(null);
-					alert.setContentText("Operation Failed! 30 days is the minimum time for a valid transference");
-					alert.showAndWait();
-				}
-			} catch(FileNotFoundException e) {
-				System.out.println("File couldn't be found");
-			} catch(IOException e) {
-				System.out.println("I/O Problem");
+				RadioButton chipped = (RadioButton)animalChipped;
+				RadioButton neutered = (RadioButton)animalNeutered;
+				RadioButton vaccinated = (RadioButton)animalVaccinated;
+				
+				boolean isChipped, isVaccinated, isNeutered;
+
+				if(chipped.getText().equalsIgnoreCase("Yes")) { isChipped = true; } else { isChipped = false; }
+				if(neutered.getText().equalsIgnoreCase("Yes")) { isNeutered = true; } else { isNeutered = false; }
+				if(vaccinated.getText().equalsIgnoreCase("Yes")) { isVaccinated = true; } else { isVaccinated = false; }
+				
+				Main.getConnection().fromFoundToAdoption(Integer.parseInt(animalID), isNeutered, isChipped, isVaccinated, animalStatus, false);
+							
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setHeaderText(null);
+				alert.setContentText("Animal added to adoption successfully!");
+				alert.showAndWait();
+							
+				clear();
+			}
+					
+			else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setHeaderText(null);
+				alert.setContentText("Operation Failed! 30 days is the minimum time for a valid transference");
+				alert.showAndWait();
 			}
 		}	
 	}	
@@ -185,10 +177,9 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 		
 		else {
 			try {
-				animalList = file.getListFromFile("Adoption");
-				int index = animalList.getIndexBySearch(Integer.parseInt(animalID));
+				Animal animal = Main.getConnection().searchAnimalById("Found", Integer.parseInt(animalAdoptionView.getAnimalSearchField().getText()));
 				
-				if(index != -1) {
+				if(animal != null) {
 					animalAdoptionView.getAnimalIdName().setVisible(true);
 					animalAdoptionView.getAnimalType().setVisible(true);
 					animalAdoptionView.getAnimalBreedAge().setVisible(true);
@@ -363,65 +354,58 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 		}
 		
 		else {
-			try {
-				animalList = file.getListFromFile("Found");
-				int index = animalList.getIndexBySearch(Integer.parseInt(animalID));
+			Animal animal = Main.getConnection().searchAnimalById("Found", Integer.parseInt(animalAdoptionView.getAnimalSearchField().getText()));
 				
-				if(index != -1) {
-					animalAdoptionView.getAnimalIdName().setVisible(true);
-					animalAdoptionView.getAnimalType().setVisible(true);
-					animalAdoptionView.getAnimalBreedAge().setVisible(true);
-					animalAdoptionView.getAnimalGenderColour().setVisible(true);
-					animalAdoptionView.getAnimalDescriptionLabel().setVisible(true);
-					animalAdoptionView.getAnimalDescriptionArea().setVisible(true);
-					animalAdoptionView.getNeuteredChipped().setVisible(true);
-					animalAdoptionView.getVaccinatedStatus().setVisible(true);
-					animalAdoptionView.getActionButtons().setVisible(true);
-					
-					String animalType = animalList.getAnimalList().get(index).getAnimalType();
-					String animalGender = animalList.getAnimalList().get(index).getAnimalGender();
-					
-					animalAdoptionView.getAnimalIdField().setText(String.valueOf(animalList.getAnimalList().get(index).getAnimalId()));
-					animalAdoptionView.getAnimalNameField().setText(animalList.getAnimalList().get(index).getAnimalName());
-					animalAdoptionView.getAnimalBreedField().setText(animalList.getAnimalList().get(index).getAnimalBreed());
-					animalAdoptionView.getAnimalAgeField().setText(String.valueOf(animalList.getAnimalList().get(index).getAnimalAge()));
-					animalAdoptionView.getAnimalColourField().setText(animalList.getAnimalList().get(index).getAnimalColour());
-					animalAdoptionView.getAnimalDescriptionArea().setText(animalList.getAnimalList().get(index).getAnimalDescription());
-					
-					if(animalGender.equalsIgnoreCase("Female")) {
-						animalAdoptionView.getFemaleAnimal().setSelected(true);
-						animalAdoptionView.getMaleAnimal().setSelected(false);
-					}
-					
-					else if(animalGender.equalsIgnoreCase("Male")) {
-						animalAdoptionView.getFemaleAnimal().setSelected(false);
-						animalAdoptionView.getMaleAnimal().setSelected(true);
-					}
-					
-					if(animalType.equalsIgnoreCase("Cat")) {
-						animalAdoptionView.getAnimalTypeField().setValue("Cat");
-					}
-					
-					else {
-						animalAdoptionView.getAnimalTypeField().setValue("Dog");
-					}
-					
-					animalAdoptionView.getAnimalSearchField().setText("");
+			if(animal != null) {
+				animalAdoptionView.getAnimalIdName().setVisible(true);
+				animalAdoptionView.getAnimalType().setVisible(true);
+
+				animalAdoptionView.getAnimalBreedAge().setVisible(true);
+				animalAdoptionView.getAnimalGenderColour().setVisible(true);
+				animalAdoptionView.getAnimalDescriptionLabel().setVisible(true);
+				animalAdoptionView.getAnimalDescriptionArea().setVisible(true);
+				animalAdoptionView.getNeuteredChipped().setVisible(true);
+				animalAdoptionView.getVaccinatedStatus().setVisible(true);
+				animalAdoptionView.getActionButtons().setVisible(true);
+				
+				String animalType = animal.getAnimalType();
+				String animalGender = animal.getAnimalGender();
+				
+				animalAdoptionView.getAnimalIdField().setText(String.valueOf(animal.getAnimalId()));
+				animalAdoptionView.getAnimalNameField().setText(animal.getAnimalName());
+				animalAdoptionView.getAnimalBreedField().setText(animal.getAnimalBreed());
+				animalAdoptionView.getAnimalAgeField().setText(String.valueOf(animal.getAnimalAge()));
+				animalAdoptionView.getAnimalColourField().setText(animal.getAnimalColour());
+				animalAdoptionView.getAnimalDescriptionArea().setText(animal.getAnimalDescription());
+				
+				if(animalGender.equalsIgnoreCase("Female")) {
+					animalAdoptionView.getFemaleAnimal().setSelected(true);
+					animalAdoptionView.getMaleAnimal().setSelected(false);
+				}
+				
+				else if(animalGender.equalsIgnoreCase("Male")) {
+					animalAdoptionView.getFemaleAnimal().setSelected(false);
+					animalAdoptionView.getMaleAnimal().setSelected(true);
+				}
+				
+				if(animalType.equalsIgnoreCase("Cat")) {
+					animalAdoptionView.getAnimalTypeField().setValue("Cat");
 				}
 				
 				else {
-					clear();
-					
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setHeaderText(null);
-					alert.setContentText("Animal couldn't be found!");
-					alert.showAndWait();
+					animalAdoptionView.getAnimalTypeField().setValue("Dog");
 				}
 				
-			} catch (FileNotFoundException e) {
-				System.out.println("File couldn't be found");
-			} catch (IOException e) {
-				System.out.println("I/O Problem");
+				animalAdoptionView.getAnimalSearchField().setText("");
+			}
+			
+			else {
+				clear();
+			
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setHeaderText(null);
+				alert.setContentText("Animal couldn't be found!");
+				alert.showAndWait();
 			}
 		}
 	}
