@@ -446,60 +446,43 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 	}
 	
 	public void allocateAnimal() {
-		try {
-			if(animalID == null || personName == null) {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText(null);
-				alert.setContentText("No field must be empty!");
-				alert.showAndWait();
-			}
+		if(animalID == null || personName == null) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText(null);
+			alert.setContentText("No field must be empty!");
+			alert.showAndWait();
+		}
+		
+		else {
+			Animal animal = Main.getConnection().searchAnimalById("Adoption", Integer.parseInt(animalID));
 			
-			else {
-				animalList = file.getListFromFile("Adoption");
-				int index = animalList.getIndexBySearch(Integer.parseInt(animalID));
-				
-				if(index != -1) {
-					if(animalList.getAnimalList().get(index).getAnimalCategory().isReserved()) {
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setHeaderText(null);
-						alert.setContentText("This animal is already reserved!");
-						alert.showAndWait();
-					}
-					
-					else if(file.searchReservationByPerson(Integer.parseInt(animalID))) {
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setHeaderText(null);
-						alert.setContentText("This person is allocated to another animal!");
-						alert.showAndWait();
-					}
-					
-					else {
-						file.allocateAnimalToFamily(Integer.parseInt(animalID), personName);
-						
-						Alert alert = new Alert(AlertType.INFORMATION);
-						alert.setHeaderText(null);
-						alert.setContentText("Animal allocated successfully!");
-						alert.showAndWait();
-					}
-					
-					animalAdoptionView.getAdoptionIds().setValue("");
-					animalAdoptionView.getAdoptionNames().setValue("");
+			if(animal != null) {
+				if(animal.getAnimalCategory().isReserved()) {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setHeaderText(null);
+					alert.setContentText("This animal is already reserved!");
+					alert.showAndWait();
 				}
 				
 				else {
-					Alert alert = new Alert(AlertType.ERROR);
+					Main.getConnection().allocateToFamily(Integer.parseInt(animalID), personName);
+					
+					Alert alert = new Alert(AlertType.INFORMATION);
 					alert.setHeaderText(null);
-					alert.setContentText("Animal not found!");
+					alert.setContentText("Animal allocated successfully!");
 					alert.showAndWait();
 				}
+				
+				animalAdoptionView.getAdoptionIds().setValue("");
+				animalAdoptionView.getAdoptionNames().setValue("");
 			}
 			
-		} catch (NumberFormatException e) {
-			System.out.println("Wrong number format!");
-		} catch (FileNotFoundException e) {
-			System.out.println("File couldn't be found!");
-		} catch (IOException e) {
-			System.out.println("I/O Problem!");
+			else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setHeaderText(null);
+				alert.setContentText("Animal not found!");
+				alert.showAndWait();
+			}
 		}
 	}
 	

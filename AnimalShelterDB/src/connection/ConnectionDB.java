@@ -890,7 +890,30 @@ public class ConnectionDB {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		
+		}	
+	}
+	
+	public void allocateToFamily(int id, String personName) {
+		try {
+			int idCategory = getIdCategoryByIdAnimal(id);
+			
+			PreparedStatement selectPerson = connection.prepareStatement("UPDATE animal_shelter.person SET idCategory = ? "
+					+ "WHERE personName = ?;");
+			
+			selectPerson.setInt(1, idCategory);
+			selectPerson.setString(2, personName);
+			selectPerson.executeUpdate();
+			
+			PreparedStatement selectAdoption = connection.prepareStatement("UPDATE animal_shelter.adoption SET adoptionReserved = ? "
+					+ "WHERE idCategory = ?;");
+			
+			selectAdoption.setBoolean(1, true);
+			selectAdoption.setInt(2, idCategory);
+			selectAdoption.executeUpdate();
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
 	}
 }
