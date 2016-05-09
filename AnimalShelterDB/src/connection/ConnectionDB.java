@@ -497,4 +497,56 @@ public class ConnectionDB {
 		
 		return animal;
 	}
+	
+	public int getIdCategoryByIdAnimal(int id) {
+		int idCategory = 0;
+		try {
+			PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idAnimal = ?;");
+			selectAnimal.setInt(1, id);
+			ResultSet resultAnimal = selectAnimal.executeQuery();			
+				
+			if(resultAnimal.next()) {			
+				idCategory = resultAnimal.getInt("idCategory");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return idCategory;
+	}
+	
+	public void deleteAnimal(String category, int id) {
+		try {
+			int idCategory = getIdCategoryByIdAnimal(id);
+			
+			PreparedStatement selectAnimal = connection.prepareStatement("DELETE FROM animal_shelter.animal WHERE idAnimal = ?;");
+			selectAnimal.setInt(1, id);
+			selectAnimal.execute();	
+			
+			if(category.equalsIgnoreCase("Lost")) {
+				PreparedStatement selectLost = connection.prepareStatement("DELETE FROM animal_shelter.lost WHERE idCategory = ?;");
+				selectLost.setInt(1, idCategory);
+				selectLost.execute();	
+			}
+			
+			else if(category.equalsIgnoreCase("Found")) {
+				PreparedStatement selectFound = connection.prepareStatement("DELETE FROM animal_shelter.found WHERE idCategory = ?;");
+				selectFound.setInt(1, idCategory);
+				selectFound.execute();
+			}
+			
+			else {
+				PreparedStatement selectAdoption = connection.prepareStatement("DELETE FROM animal_shelter.adoption WHERE idCategory = ?;");
+				selectAdoption.setInt(1, idCategory);
+				selectAdoption.execute();
+			}
+			
+			PreparedStatement selectCategory = connection.prepareStatement("UPDATE animal_shelter.category SET categoryDate = null WHERE idCategory = ?;");
+			selectCategory.setInt(1, idCategory);
+			selectCategory.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -23,6 +23,7 @@ import model.Animal;
 import model.AnimalList;
 import model.Category;
 import model.FoundAnimal;
+import model.Person;
 
 public class FoundAnimalController implements EventHandler<ActionEvent>{
 	FoundAnimalView foundAnimalView;
@@ -261,38 +262,37 @@ public class FoundAnimalController implements EventHandler<ActionEvent>{
 	}
 	
 	public void remove() {
-		try {
-			if(ownerName.isEmpty() || ownerTelephone.isEmpty()) {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText(null);
-				alert.setContentText("Owner's name and/or telephone must not be empty!");
-				alert.showAndWait();
-			}
-			
-			else {
-				Alert alert = new Alert(AlertType.CONFIRMATION);
-				alert.setHeaderText(null);
-				alert.setContentText("Do you really want to delete?");
+		if(ownerName.isEmpty() || ownerTelephone.isEmpty()) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText(null);
+			alert.setContentText("Owner's name and/or telephone must not be empty!");
+			alert.showAndWait();
+		}
+		
+		else {
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.setHeaderText(null);
+			alert.setContentText("Do you really want to delete?");
 
-				Optional<ButtonType> result = alert.showAndWait();
-				if (result.get() == ButtonType.OK){
-					file.removeOwnerFromFile(Integer.parseInt(animalID));
-					file.removeAnimalFromFile(Integer.parseInt(animalID));
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.get() == ButtonType.OK){
+				
+				Alert confirmation = new Alert(AlertType.INFORMATION);
+				confirmation.setHeaderText(null);
+				confirmation.setContentText("Animal removed successfully!");
+				confirmation.showAndWait();
 					
-					Alert confirmation = new Alert(AlertType.INFORMATION);
-					confirmation.setHeaderText(null);
-					confirmation.setContentText("Animal removed successfully!");
-					confirmation.showAndWait();
-
-					file.writeInFile("OwnerContact.txt", "Found" + "\t" + animalID + "\t" + ownerName + "\t" + ownerTelephone + "\t" 
-								+ ownerEmail + "\t" + ownerAddress);
+				Person person = new Person();
+				person.setPersonName(ownerName);
+				person.setPersonAddress(ownerAddress);
+				person.setPersonPhone(ownerTelephone);
+				person.setPersonEmail(ownerEmail);
 					
-					clearRemove();
-				} 
-			}
-			
-		} catch (NumberFormatException | IOException e) {
-			e.printStackTrace();
+				Main.getConnection().addPerson(person, Main.getConnection().getIdCategoryByIdAnimal(Integer.parseInt(animalID)));
+				Main.getConnection().deleteAnimal("Found", Integer.parseInt(animalID));
+				
+				clearRemove();
+			} 
 		}
 	}
 	
