@@ -424,26 +424,25 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 	}
 	
 	public void updateInformation() {
-		try {
-			RadioButton chipped = (RadioButton)animalChipped;
-			RadioButton neutered = (RadioButton)animalNeutered;
-			RadioButton vaccinated = (RadioButton)animalVaccinated;
+		RadioButton chipped = (RadioButton)animalChipped;
+		RadioButton neutered = (RadioButton)animalNeutered;
+		RadioButton vaccinated = (RadioButton)animalVaccinated;
+		
+		boolean isChipped, isVaccinated, isNeutered;
+
+		if(chipped.getText().equalsIgnoreCase("Yes")) { isChipped = true; } else { isChipped = false; }
+		if(neutered.getText().equalsIgnoreCase("Yes")) { isNeutered = true; } else { isNeutered = false; }
+		if(vaccinated.getText().equalsIgnoreCase("Yes")) { isVaccinated = true; } else { isVaccinated = false; }
+		
+		Main.getConnection().updateAdoptionAnimal(Integer.parseInt(animalID), isNeutered, isChipped, isVaccinated, false, animalStatus);
 			
-			file.updateAdoptionFile(Integer.parseInt(animalID), chipped.getText(), neutered.getText(), vaccinated.getText(), animalStatus);
-			
-			Alert alert = new Alert(AlertType.INFORMATION);
-			alert.setHeaderText(null);
-			alert.setContentText("Animal updated successfully!");
-			alert.showAndWait();
-			
-			animalAdoptionView.getAnimalDetails().setItems(displayAll());
-			animalAdoptionView.getAllowEditAnimalCheckBox().setSelected(false);
-			
-		} catch (FileNotFoundException e) {
-			System.out.println("File couldn't be found");
-		} catch(IOException e) {
-			System.out.println("I/O Problem");
-		}
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setHeaderText(null);
+		alert.setContentText("Animal updated successfully!");
+		alert.showAndWait();
+		
+		animalAdoptionView.getAnimalDetails().setItems(displayAll());
+		animalAdoptionView.getAllowEditAnimalCheckBox().setSelected(false);
 	}
 	
 	public void allocateAnimal() {

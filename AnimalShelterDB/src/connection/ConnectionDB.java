@@ -873,4 +873,24 @@ public class ConnectionDB {
 		
 		return date;
 	}
+	
+	public void updateAdoptionAnimal(int id, boolean neutered, boolean chipped, boolean vaccinated, boolean reserved, String status) {
+		try {
+			int idCategory = getIdCategoryByIdAnimal(id);
+			
+			PreparedStatement selectAdoption = connection.prepareStatement("UPDATE animal_shelter.adoption SET adoptionNeutered = ?, "
+					+ "adoptionVaccinated = ?, adoptionChipped = ?, adoptionStatus = ?, adoptionReserved = ? WHERE idCategory = ?;");
+			selectAdoption.setBoolean(1, neutered);
+			selectAdoption.setBoolean(2, vaccinated);
+			selectAdoption.setBoolean(3, chipped);
+			selectAdoption.setString(4, status);
+			selectAdoption.setBoolean(5, reserved);
+			selectAdoption.setInt(6, idCategory);
+			selectAdoption.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }
