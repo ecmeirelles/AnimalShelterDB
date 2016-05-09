@@ -2,6 +2,7 @@ package application;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 import controller.LostAnimalController;
 import javafx.beans.value.ChangeListener;
@@ -55,6 +56,8 @@ public class LostAnimalView extends Scene {
 	
 	final ComboBox<String> animalTypeField = new ComboBox<>(types);
 	final ComboBox<String> animalTypeReport = new ComboBox<>(moreTypes);
+
+	private Random random = new Random();
 
 	public LostAnimalView(BorderPane root, double width, double height, String action) {
 		super(root, width, height);
@@ -118,8 +121,11 @@ public class LostAnimalView extends Scene {
 	    title.getChildren().add(sectionTitle);
 	    title.setAlignment(Pos.CENTER);
 	    
+	    int idNumber = random.nextInt(1000000);
 		animalIdLabel = new Label("ID*:");
 	    animalIdField = new TextField();
+	    animalIdField.setText(String.valueOf(idNumber));
+	    animalIdField.setEditable(false);
 	    animalIdField.setMinWidth(50);
 	    animalNameLabel = new Label("Name*:");
 	    animalNameField = new TextField();

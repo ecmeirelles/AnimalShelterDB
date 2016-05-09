@@ -38,10 +38,9 @@ public class ConnectionDB {
 		}
 	}
 	
-	public void addPerson(Person person) {
+	public void addPerson(Person person, int idCategory) {
 		try {
-			PreparedStatement insertPerson = connection.prepareStatement("INSERT INTO animal_shelter.person(idPerson, personName, personAddress, personPhone, personEmail)" 
-					+ "VALUES (?, ?, ?, ?, ?);");
+			PreparedStatement insertPerson = connection.prepareStatement("INSERT INTO animal_shelter.person " + "VALUES (?, ?, ?, ?, ?, ?);");
 			
 			int value = random.nextInt(10000);
 			
@@ -50,6 +49,7 @@ public class ConnectionDB {
 			insertPerson.setString(3, person.getPersonAddress());
 			insertPerson.setString(4, person.getPersonPhone());
 			insertPerson.setString(5, person.getPersonEmail());
+			insertPerson.setInt(6, idCategory);
 			
 			insertPerson.executeUpdate();
 			
@@ -79,102 +79,79 @@ public class ConnectionDB {
 		return idPerson;
 	}
 	
-	public void addCategory(Animal animal) {
+	public int addCategoryAndGetId(Animal animal) {
+		int idCategory = 0;
 		
 		try {
-			PreparedStatement insertCategory = connection.prepareStatement("INSERT INTO animal_shelter.category " + "VALUES (?, ?, ?);");
+			PreparedStatement insertCategory = connection.prepareStatement("INSERT INTO animal_shelter.category " + "VALUES (?, ?);");
 			
-			int valueCategory = random.nextInt(10000);
-			insertCategory.setInt(1, valueCategory);
-			insertCategory.setDate(2, Date.valueOf(animal.getAnimalCategory().getDate()));
-			insertCategory.setInt(3, searchIdPersonLinkToAnimal(animal));
+			idCategory = random.nextInt(10000);
+			insertCategory.setInt(1, idCategory);
+			insertCategory.setDate(2, Date.valueOf(animal.getAnimalCategory().getDate()));			
 			insertCategory.executeUpdate();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}			
-	}
-	
-	public int searchAnimalCategory(Animal animal) {
-		int idCategory = 0;
-		
-		try {
-			PreparedStatement selectCategory = connection.prepareStatement("SELECT idCategory FROM animal_shelter.category WHERE idPerson = ?;");
-			selectCategory.setInt(1, searchIdPersonLinkToAnimal(animal));
-			ResultSet resultCategory = selectCategory.executeQuery();			
-			
-			if(resultCategory.next()) {
-				idCategory = resultCategory.getInt("idCategory");
-			}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		}	
 		
 		return idCategory;
 	}
 	
+	
 	public void addAnimal(Animal animal, String category) {
-		try {
-			int idPerson = searchIdPersonLinkToAnimal(animal);
+		try {			
+			int idCategory = addCategoryAndGetId(animal);
 			
-			if(idPerson != 0) {
-				addCategory(animal);
-				int idCategory = searchAnimalCategory(animal);
-								
-				if(idCategory != 0) {
-					PreparedStatement insertSituation = null;
-					int valueSituation = random.nextInt(10000);
+			if(idCategory != 0) {
+				PreparedStatement insertSituation = null;
+				int valueSituation = random.nextInt(10000);
 					
-					if(category.equalsIgnoreCase("Lost")) {
-						insertSituation = connection.prepareStatement("INSERT INTO animal_shelter.lost " + "VALUES (?, ?, ?);");			
-						insertSituation.setInt(1, valueSituation);
-						insertSituation.setString(2, animal.getAnimalCategory().getLocation());
-						insertSituation.setInt(3, idCategory);			
-						insertSituation.executeUpdate();
-					}
+				if(category.equalsIgnoreCase("Lost")) {
+					addPerson(animal.getAnimalCategory().getEmergencyContact(), idCategory);
 					
-					else if(category.equalsIgnoreCase("Found")) {
-						insertSituation = connection.prepareStatement("INSERT INTO animal_shelter.found " + "VALUES (?, ?, ?);");			
-						insertSituation.setInt(1, valueSituation);
-						insertSituation.setString(2, animal.getAnimalCategory().getLocation());
-						insertSituation.setInt(3, idCategory);			
-						insertSituation.executeUpdate();
-					}
+					insertSituation = connection.prepareStatement("INSERT INTO animal_shelter.lost " + "VALUES (?, ?, ?);");			
+					insertSituation.setInt(1, valueSituation);
+					insertSituation.setString(2, animal.getAnimalCategory().getLocation());
+					insertSituation.setInt(3, idCategory);			
+					insertSituation.executeUpdate();
+				}
 					
-					else {
-						insertSituation = connection.prepareStatement("INSERT INTO animal_shelter.adoption " + "VALUES (?, ?, ?, ?, ?, ?, ?);");			
-						insertSituation.setInt(1, valueSituation);
-						insertSituation.setBoolean(2, animal.getAnimalCategory().isNeutered());
-						insertSituation.setBoolean(3, animal.getAnimalCategory().isVaccinated());
-						insertSituation.setBoolean(4, animal.getAnimalCategory().isChipped());
-						insertSituation.setString(5, animal.getAnimalCategory().getStatus());
-						insertSituation.setBoolean(6, animal.getAnimalCategory().isReserved());
-						insertSituation.setInt(7, idCategory);			
-						insertSituation.executeUpdate();
-					}
-					
-					PreparedStatement insertAnimal = connection.prepareStatement("INSERT INTO animal_shelter.animal " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-					insertAnimal.setInt(1, animal.getAnimalId());
-					insertAnimal.setInt(2, animal.getAnimalAge());
-					insertAnimal.setString(3, animal.getAnimalType());
-					insertAnimal.setString(4, animal.getAnimalColour());
-					insertAnimal.setString(5, animal.getAnimalGender());
-					insertAnimal.setString(6, animal.getAnimalDescription());
-					insertAnimal.setString(7, animal.getAnimalName());
-					insertAnimal.setString(8, "");
-					insertAnimal.setString(9, animal.getAnimalBreed());
-					insertAnimal.setInt(10, idCategory);
-					insertAnimal.executeUpdate();
+				else if(category.equalsIgnoreCase("Found")) {
+					insertSituation = connection.prepareStatement("INSERT INTO animal_shelter.found " + "VALUES (?, ?, ?);");			
+					insertSituation.setInt(1, valueSituation);
+					insertSituation.setString(2, animal.getAnimalCategory().getLocation());
+					insertSituation.setInt(3, idCategory);			
+					insertSituation.executeUpdate();
 				}
 				
 				else {
-					System.out.println("ERROR: Wrong idCategory");
+					insertSituation = connection.prepareStatement("INSERT INTO animal_shelter.adoption " + "VALUES (?, ?, ?, ?, ?, ?, ?);");			
+					insertSituation.setInt(1, valueSituation);
+					insertSituation.setBoolean(2, animal.getAnimalCategory().isNeutered());
+					insertSituation.setBoolean(3, animal.getAnimalCategory().isVaccinated());
+					insertSituation.setBoolean(4, animal.getAnimalCategory().isChipped());
+					insertSituation.setString(5, animal.getAnimalCategory().getStatus());
+					insertSituation.setBoolean(6, animal.getAnimalCategory().isReserved());
+					insertSituation.setInt(7, idCategory);			
+					insertSituation.executeUpdate();
 				}
+				
+				PreparedStatement insertAnimal = connection.prepareStatement("INSERT INTO animal_shelter.animal " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+				insertAnimal.setInt(1, animal.getAnimalId());
+				insertAnimal.setInt(2, animal.getAnimalAge());
+				insertAnimal.setString(3, animal.getAnimalType());
+				insertAnimal.setString(4, animal.getAnimalColour());
+				insertAnimal.setString(5, animal.getAnimalGender());
+				insertAnimal.setString(6, animal.getAnimalDescription());
+				insertAnimal.setString(7, animal.getAnimalName());
+				insertAnimal.setString(8, "");
+				insertAnimal.setString(9, animal.getAnimalBreed());
+				insertAnimal.setInt(10, idCategory);
+				insertAnimal.executeUpdate();
 			}
-			
+				
 			else {
-				System.out.println("ERROR: Wrong idPerson");
+				System.out.println("ERROR: Wrong idCategory");
 			}
 			
 		} catch (SQLException e) {

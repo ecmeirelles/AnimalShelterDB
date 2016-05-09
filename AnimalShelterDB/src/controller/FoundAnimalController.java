@@ -21,6 +21,8 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.Alert.AlertType;
 import model.Animal;
 import model.AnimalList;
+import model.Category;
+import model.FoundAnimal;
 
 public class FoundAnimalController implements EventHandler<ActionEvent>{
 	ShelterFile file = new ShelterFile();
@@ -107,44 +109,44 @@ public class FoundAnimalController implements EventHandler<ActionEvent>{
 
 	public void submit() {
 
-		try {
-			if(animalID.isEmpty() || animalType == "" || animalDate == null  || 
-					animalLocation.isEmpty() || animalDescription.isEmpty() || 
-					(!foundAnimalView.getFemaleAnimal().isSelected() && !foundAnimalView.getMaleAnimal().isSelected())) {
+		if(animalID.isEmpty() || animalType == "" || animalDate == null  || 
+				animalLocation.isEmpty() || animalDescription.isEmpty() || 
+				(!foundAnimalView.getFemaleAnimal().isSelected() && !foundAnimalView.getMaleAnimal().isSelected())) {
 				
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText("Empty Field!");
-				alert.setContentText("One or more of the following fields is empty. Please fill it."
-						+ "\n* ID \n* Type \n* Gender \n* Description \n* Date \n* Location");
-				alert.showAndWait();	
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText("Empty Field!");
+			alert.setContentText("One or more of the following fields is empty. Please fill it."
+					+ "\n* ID \n* Type \n* Gender \n* Description \n* Date \n* Location");
+			alert.showAndWait();	
+		}
+			
+		else {
+			if(!Main.getConnection().searchAnimalId(Integer.parseInt(animalID))) {
+				RadioButton gender = (RadioButton) animalGender;
+					
+				Animal animal = new Animal();
+				animal.setAnimalId(Integer.parseInt(animalID));
+				animal.setAnimalAge(Integer.parseInt(animalAge));
+				animal.setAnimalBreed(animalBreed);
+				animal.setAnimalColour(animalColour);
+				animal.setAnimalDescription(animalDescription);
+				animal.setAnimalGender(gender.getText());
+				animal.setAnimalName(animalName);
+				animal.setAnimalType(animalType);
+					
+				Category category = new FoundAnimal(animalDate, null, animalLocation);
+				animal.setAnimalCategory(category);
+	          		
+				Main.getConnection().addAnimal(animal, "Found");
+				
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setHeaderText(null);
+				alert.setContentText("Animal added successfully!");
+				alert.showAndWait();
+				
+				clearSubmit();
 			}
-			
-			else {
-				animalList = file.getListFromFile("All");
-				
-				if(!animalList.searchAnimal(Integer.parseInt(animalID)) && !file.searchAnimalIdByPerson(Integer.parseInt(animalID))) {
-					RadioButton gender = (RadioButton) animalGender;
-					
-					file.writeInFile("Animal.txt", "Found" + "\t" + animalID + "\t" + animalName + "\t" + animalType + "\t" 
-						+ animalBreed + "\t" + animalAge + "\t" + gender.getText() + "\t" + animalColour + "\t" 
-						+ animalDescription + "\t" + animalDate + "\t" + animalLocation);
-						
-					Alert alert = new Alert(AlertType.INFORMATION);
-					alert.setHeaderText(null);
-					alert.setContentText("Animal added successfully!");
-					alert.showAndWait();
-					
-					clearSubmit();
-				}
-			}	
-		}
-			
-		catch (FileNotFoundException e) {
-				System.out.println("File couldn't be found!");
-		}
-		catch (IOException e) {
-			System.out.println("I/O Problem!");
-		}
+		}	
 	}
 	
 	public void clearSubmit() {
