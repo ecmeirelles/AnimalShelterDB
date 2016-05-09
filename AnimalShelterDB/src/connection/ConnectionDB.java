@@ -307,13 +307,13 @@ public class ConnectionDB {
 		return details;
 	}
 	
-	public ObservableList<Animal> getLostAnimalsToReport(String type, String location, LocalDate date) {
+	public ObservableList<Animal> getFoundAnimalsToReport(String type, String location, LocalDate date, LocalDate betweenDate) {
 		String categoryLocation = "";
 		AnimalList animalList = new AnimalList();
 		ObservableList<Animal> details = FXCollections.observableArrayList();
 		
 		try {
-			ArrayList<Integer> categoryIds = getLostIds();		
+			ArrayList<Integer> categoryIds = getFoundIds();		
 			
 			for(int i =0; i < categoryIds.size(); i++) {
 				PreparedStatement selectAnimal = null;
@@ -334,27 +334,27 @@ public class ConnectionDB {
 				}
 									
 				if(resultAnimal.next()) {
-					PreparedStatement selectLost = null;
-					ResultSet resultLost = null;
+					PreparedStatement selectFound = null;
+					ResultSet resultFound = null;
 					
 					if(!location.equals("")) {
-						selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ? "
-								+ "AND lostLocation = ?;");
-						selectLost.setInt(1, categoryIds.get(i));
-						selectLost.setString(2, location);
-						resultLost = selectLost.executeQuery();
+						selectFound = connection.prepareStatement("SELECT * FROM animal_shelter.found WHERE idCategory = ? "
+								+ "AND FoundLocation = ?;");
+						selectFound.setInt(1, categoryIds.get(i));
+						selectFound.setString(2, location);
+						resultFound = selectFound.executeQuery();
 						
 					}
 					
 					else {
-						selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ?;");
-						selectLost.setInt(1, categoryIds.get(i));
-						resultLost = selectLost.executeQuery();
+						selectFound = connection.prepareStatement("SELECT * FROM animal_shelter.found WHERE idCategory = ?;");
+						selectFound.setInt(1, categoryIds.get(i));
+						resultFound = selectFound.executeQuery();
 					}
 					
 					Animal animal = new Animal();
 					
-					if(resultLost.next()) {														
+					if(resultFound.next()) {														
 						animal.setAnimalId(resultAnimal.getInt("idAnimal"));
 						animal.setAnimalAge(resultAnimal.getInt("animalAge"));
 						animal.setAnimalType(resultAnimal.getString("animalType"));
@@ -369,16 +369,16 @@ public class ConnectionDB {
 						}
 						
 						else {
-							categoryLocation = resultLost.getString("lostLocation");
+							categoryLocation = resultFound.getString("foundLocation");
 						}
 						
-						if(date == null) {
+						if(date == null && betweenDate == null) {
 							PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ?;");
 							selectCategory.setInt(1, categoryIds.get(i));
 							ResultSet resultCategory = selectCategory.executeQuery();
 								
 							if(resultCategory.next()) {
-								Category animalCategory = new LostAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
+								Category animalCategory = new FoundAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
 										searchPersonLinkedToAnimal(categoryIds.get(i)), categoryLocation);
 								animal.setAnimalCategory(animalCategory);
 								
@@ -388,13 +388,14 @@ public class ConnectionDB {
 						
 						else {
 							PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ? "
-									+ "AND categoryDate = ?;");
+									+ "AND (categoryDate >= ? AND categoryDate <= ?);");
 							selectCategory.setInt(1, categoryIds.get(i));
 							selectCategory.setDate(2, Date.valueOf(date));
+							selectCategory.setDate(3, Date.valueOf(betweenDate));
 							ResultSet resultCategory = selectCategory.executeQuery();
 								
 							if(resultCategory.next()) {
-								Category animalCategory = new LostAnimal(date, searchPersonLinkedToAnimal(categoryIds.get(i)), categoryLocation);
+								Category animalCategory = new FoundAnimal(date, searchPersonLinkedToAnimal(categoryIds.get(i)), categoryLocation);
 								animal.setAnimalCategory(animalCategory);
 								
 								animalList.addAnimal(animal);
@@ -581,5 +582,111 @@ public class ConnectionDB {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public ObservableList<Animal> getLostAnimalsToReport(String type, String location, LocalDate date) {
+		String categoryLocation = "";
+		AnimalList animalList = new AnimalList();
+		ObservableList<Animal> details = FXCollections.observableArrayList();
+		
+		try {
+			ArrayList<Integer> categoryIds = getLostIds();		
+			
+			for(int i =0; i < categoryIds.size(); i++) {
+				PreparedStatement selectAnimal = null;
+				ResultSet resultAnimal = null;
+				
+				if(type.equals("All")) {
+					selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idCategory = ?;");
+					selectAnimal.setInt(1, categoryIds.get(i));
+					resultAnimal = selectAnimal.executeQuery();
+				}
+				
+				else {
+					selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idCategory = ? "
+							+ "AND animalType = ?;");
+					selectAnimal.setInt(1, categoryIds.get(i));
+					selectAnimal.setString(2, type);
+					resultAnimal = selectAnimal.executeQuery();
+				}
+									
+				if(resultAnimal.next()) {
+					PreparedStatement selectLost = null;
+					ResultSet resultLost = null;
+					
+					if(!location.equals("")) {
+						selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ? "
+								+ "AND lostLocation = ?;");
+						selectLost.setInt(1, categoryIds.get(i));
+						selectLost.setString(2, location);
+						resultLost = selectLost.executeQuery();
+						
+					}
+					
+					else {
+						selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ?;");
+						selectLost.setInt(1, categoryIds.get(i));
+						resultLost = selectLost.executeQuery();
+					}
+					
+					Animal animal = new Animal();
+					
+					if(resultLost.next()) {														
+						animal.setAnimalId(resultAnimal.getInt("idAnimal"));
+						animal.setAnimalAge(resultAnimal.getInt("animalAge"));
+						animal.setAnimalType(resultAnimal.getString("animalType"));
+						animal.setAnimalColour(resultAnimal.getString("animalColour"));
+						animal.setAnimalGender(resultAnimal.getString("animalGender"));
+						animal.setAnimalDescription(resultAnimal.getString("animalDescription"));
+						animal.setAnimalName(resultAnimal.getString("animalName"));
+						animal.setAnimalBreed(resultAnimal.getString("animalBreed"));
+						
+						if(!location.equals("")) {
+							categoryLocation = location;
+						}
+						
+						else {
+							categoryLocation = resultLost.getString("lostLocation");
+						}
+						
+						if(date == null) {
+							PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ?;");
+							selectCategory.setInt(1, categoryIds.get(i));
+							ResultSet resultCategory = selectCategory.executeQuery();
+								
+							if(resultCategory.next()) {
+								Category animalCategory = new LostAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
+										searchPersonLinkedToAnimal(categoryIds.get(i)), categoryLocation);
+								animal.setAnimalCategory(animalCategory);
+								
+								animalList.addAnimal(animal);
+							}
+						}
+						
+						else {
+							PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ? "
+									+ "AND categoryDate = ?;");
+							selectCategory.setInt(1, categoryIds.get(i));
+							selectCategory.setDate(2, Date.valueOf(date));
+							ResultSet resultCategory = selectCategory.executeQuery();
+								
+							if(resultCategory.next()) {
+								Category animalCategory = new LostAnimal(date, searchPersonLinkedToAnimal(categoryIds.get(i)), categoryLocation);
+								animal.setAnimalCategory(animalCategory);
+								
+								animalList.addAnimal(animal);
+							}
+						}
+					}		
+				}
+			}
+			
+			details.addAll(animalList.getAnimalList());
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return details;
 	}
 }

@@ -1,7 +1,5 @@
 package controller;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -9,7 +7,6 @@ import application.FoundAnimalView;
 import application.Main;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,7 +17,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.Alert.AlertType;
 import model.Animal;
-import model.AnimalList;
 import model.Category;
 import model.FoundAnimal;
 import model.Person;
@@ -344,54 +340,48 @@ public class FoundAnimalController implements EventHandler<ActionEvent>{
 		}
 	}
 	
-	public void generateReport() {
-		ObservableList<Animal> details = FXCollections.observableArrayList();
+	public void generateReport() {		
+		if(animalDate == null && animalLocation.isEmpty() && animalType == null) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText(null);
+			alert.setContentText("Fill at least two fields");
+			alert.showAndWait();
+		}
 		
-		try {
-			if(animalDate == null && animalLocation.isEmpty() && animalType == null) {
+		else {
+			ObservableList<Animal> details = Main.getConnection().getFoundAnimalsToReport(animalType, animalLocation, animalDate, betweenDate);
+			
+			if(details.isEmpty()) {
+				foundAnimalView.getAnimalDetails().setVisible(false);
+				
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setHeaderText(null);
-				alert.setContentText("Fill at least two fields");
+				alert.setContentText("No animal found!");
 				alert.showAndWait();
 			}
 			
 			else {
-				animalList = file.getListToReport("Found", animalType, animalDate, betweenDate, animalLocation);
+				foundAnimalView.getGenderColumn().setSortType(TableColumn.SortType.ASCENDING);
 				
-				if(animalList.getAnimalList().size() == 0) {
-					foundAnimalView.getAnimalDetails().setVisible(false);
-					
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setHeaderText(null);
-					alert.setContentText("No animal found!");
-					alert.showAndWait();
-				}
-				
-				else {
-					details.addAll(animalList.getAnimalList());
-					foundAnimalView.getGenderColumn().setSortType(TableColumn.SortType.ASCENDING);
-					
-					foundAnimalView.getIdColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalId()));
-				    foundAnimalView.getNameColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalName()));
-				    foundAnimalView.getTypeColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalType()));
-				    foundAnimalView.getAgeColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalAge()));
-				    foundAnimalView.getBreedColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalBreed()));
-				    foundAnimalView.getColourColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalColour()));
-				    foundAnimalView.getGenderColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalGender()));
-				    foundAnimalView.getDescriptionColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalDescription()));
-				    foundAnimalView.getDateColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getDate().toString()));
-				    foundAnimalView.getLocationColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getLocation()));
-				    
-				    foundAnimalView.getAnimalDetails().setItems(details);
-				    if(animalLocation.isEmpty()) {
-				    	foundAnimalView.getAnimalDetails().getSortOrder().add(foundAnimalView.getGenderColumn());
-				    }
-				    foundAnimalView.getAnimalDetails().setVisible(true);
-				}
+				foundAnimalView.getIdColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalId()));
+			    foundAnimalView.getNameColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalName()));
+			    foundAnimalView.getTypeColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalType()));
+			    foundAnimalView.getAgeColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalAge()));
+			    foundAnimalView.getBreedColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalBreed()));
+			    foundAnimalView.getColourColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalColour()));
+			    foundAnimalView.getGenderColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalGender()));
+			    foundAnimalView.getDescriptionColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalDescription()));
+			    foundAnimalView.getDateColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getDate().toString()));
+			    foundAnimalView.getLocationColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getLocation()));
+			    
+			    foundAnimalView.getAnimalDetails().setItems(details);
+			    
+			    if(animalLocation.isEmpty()) {
+			    	foundAnimalView.getAnimalDetails().getSortOrder().add(foundAnimalView.getGenderColumn());
+			    }
+			    
+			    foundAnimalView.getAnimalDetails().setVisible(true);
 			}
-		    
-		} catch (IOException e) {
-			System.out.println("I/O Problem");
 		}
 	}
 }
