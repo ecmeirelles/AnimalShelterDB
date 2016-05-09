@@ -55,8 +55,6 @@ public class Main extends Application {
 			primaryStage.setScene(scene);
 			primaryStage.show();
 			
-			//TODO: Transferencia
-			
 			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 		          public void handle(WindowEvent we) {
 		        	connection.closeConnection();
