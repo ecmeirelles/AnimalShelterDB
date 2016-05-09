@@ -1,6 +1,5 @@
 package controller;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -8,7 +7,6 @@ import application.LostAnimalView;
 import application.Main;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -18,14 +16,12 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import model.Animal;
-import model.AnimalList;
 import model.Category;
 import model.LostAnimal;
 import model.Person;
 
 public class LostAnimalController extends ActionEvent implements EventHandler<ActionEvent> {
 	private static final long serialVersionUID = 1L;
-	AnimalList animalList = new AnimalList();
 	LostAnimalView lostAnimalView;
 	
 	String animalID, animalName, animalBreed, animalAge, animalColour, animalDescription, animalLocation, animalType;
@@ -188,7 +184,7 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 	}
 	
 	public void generateReport() {
-		ObservableList<Animal> details = Main.getConnection().getLostAnimalsToReport("Lost", animalType, animalLocation, animalDate);
+		ObservableList<Animal> details = Main.getConnection().getLostAnimalsToReport(animalType, animalLocation, animalDate);
 
 			if(animalDate == null && animalLocation.isEmpty() && animalType == null) {
 				Alert alert = new Alert(AlertType.ERROR);
