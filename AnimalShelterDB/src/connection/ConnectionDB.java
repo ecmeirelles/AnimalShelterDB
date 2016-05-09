@@ -284,6 +284,10 @@ public class ConnectionDB {
 				categoryIds = getFoundIds();
 			}
 			
+			else {
+				categoryIds = getAdoptionIds();
+			}
+			
 			for(int i =0; i < categoryIds.size(); i++) {
 				PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idCategory = ?;");
 				selectAnimal.setInt(1, categoryIds.get(i));
@@ -291,7 +295,8 @@ public class ConnectionDB {
 				
 				if(resultAnimal.next()) {
 					Animal animal = new Animal();
-					String location = "";
+					String location = "", status = "";
+					boolean isChipped = false, isVaccinated = false, isNeutered = false, isReserved = false;
 					
 					animal.setAnimalId(resultAnimal.getInt("idAnimal"));
 					animal.setAnimalAge(resultAnimal.getInt("animalAge"));
@@ -321,6 +326,20 @@ public class ConnectionDB {
 							location = resultFound.getString("foundLocation");
 						}
 					}
+					
+					else {
+						PreparedStatement selectAdoption = connection.prepareStatement("SELECT * FROM animal_shelter.adoption WHERE idCategory = ?;");
+						selectAdoption.setInt(1, categoryIds.get(i));
+						ResultSet resultAdoption = selectAdoption.executeQuery();
+						
+						if(resultAdoption.next()) {						
+							isNeutered = resultAdoption.getBoolean("adoptionNeutered");
+							isVaccinated = resultAdoption.getBoolean("adoptionVaccinated");
+							isChipped = resultAdoption.getBoolean("adoptionChipped");
+							status = resultAdoption.getString("adoptionStatus");
+							isReserved = resultAdoption.getBoolean("adoptionReserved");
+						}
+					}
 						
 					PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ?;");
 					selectCategory.setInt(1, categoryIds.get(i));
@@ -336,6 +355,11 @@ public class ConnectionDB {
 						else if(category.equalsIgnoreCase("Found")) {
 							Category animalCategory = new FoundAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
 									searchPersonLinkedToAnimal(categoryIds.get(i)), location);
+							animal.setAnimalCategory(animalCategory);
+						}
+						
+						else {
+							Category animalCategory = new AnimalAdoption(null, null, isNeutered, isChipped, isVaccinated, status, isReserved);
 							animal.setAnimalCategory(animalCategory);
 						}
 					}		
@@ -554,7 +578,7 @@ public class ConnectionDB {
 					else {
 						if(animal != null) {
 							Category animalCategory = new AnimalAdoption(null, null, isNeutered, isChipped, isVaccinated, status, isReserved);
-						animal.setAnimalCategory(animalCategory);
+							animal.setAnimalCategory(animalCategory);
 						}
 					}
 				}		

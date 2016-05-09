@@ -258,29 +258,21 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 	}
 
 	public ObservableList<Animal> displayAll() {
-		ObservableList<Animal> details = FXCollections.observableArrayList();
-		
-		try {
-			animalList = file.getListFromFile("Adoption");
-			details.addAll(animalList.getAnimalList());
-				
-			animalAdoptionView.getReservedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isReserved()));
-			animalAdoptionView.getIdColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalId()));
-			animalAdoptionView.getNameColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalName()));
-			animalAdoptionView.getTypeColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalType()));
-			animalAdoptionView.getAgeColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalAge()));
-			animalAdoptionView.getBreedColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalBreed()));
-			animalAdoptionView.getColourColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalColour()));
-			animalAdoptionView.getGenderColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalGender()));
-			animalAdoptionView.getDescriptionColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalDescription()));
-			animalAdoptionView.getChippedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isChipped()));
-			animalAdoptionView.getNeuteredColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isNeutered()));
-			animalAdoptionView.getVaccinatedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isVaccinated()));
-			animalAdoptionView.getStatusColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getStatus()));
+		ObservableList<Animal> details = Main.getConnection().getAnimals("Adoption");
 			
-		} catch (IOException e) {
-			System.out.println("I/O Problem");
-		}
+		animalAdoptionView.getReservedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isReserved()));
+		animalAdoptionView.getIdColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalId()));
+		animalAdoptionView.getNameColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalName()));
+		animalAdoptionView.getTypeColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalType()));
+		animalAdoptionView.getAgeColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalAge()));
+		animalAdoptionView.getBreedColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalBreed()));
+		animalAdoptionView.getColourColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalColour()));
+		animalAdoptionView.getGenderColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalGender()));
+		animalAdoptionView.getDescriptionColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalDescription()));
+		animalAdoptionView.getChippedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isChipped()));
+		animalAdoptionView.getNeuteredColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isNeutered()));
+		animalAdoptionView.getVaccinatedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isVaccinated()));
+		animalAdoptionView.getStatusColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getStatus()));
 
 		return details;
 	}
