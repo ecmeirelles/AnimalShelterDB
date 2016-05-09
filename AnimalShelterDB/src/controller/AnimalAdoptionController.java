@@ -278,15 +278,12 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 	}
 	
 	public void remove() {
-		try {
-			animalList = file.getListFromFile("Adoption");
-			int i = animalList.getIndexBySearch(Integer.parseInt(animalAdoptionView.getAnimalIdField().getText()));
-			
-			if(animalList.getAnimalList().get(i).getAnimalCategory().isChipped() && 
-					animalList.getAnimalList().get(i).getAnimalCategory().isNeutered() &&
-					animalList.getAnimalList().get(i).getAnimalCategory().isVaccinated() &&
-					animalList.getAnimalList().get(i).getAnimalCategory().getStatus().equalsIgnoreCase("Ready") &&
-					animalList.getAnimalList().get(i).getAnimalCategory().isReserved()) {
+		Animal animal = Main.getConnection().searchAnimalById("Adoption", Integer.parseInt(animalID));
+		
+		if(animal != null) {
+			if(animal.getAnimalCategory().isChipped() && animal.getAnimalCategory().isNeutered() &&
+					animal.getAnimalCategory().isVaccinated() && animal.getAnimalCategory().getStatus().equalsIgnoreCase("Ready") && 
+					animal.getAnimalCategory().isReserved()) {
 				
 				Alert alert = new Alert(AlertType.CONFIRMATION);
 				alert.setHeaderText(null);
@@ -294,7 +291,7 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 	
 				Optional<ButtonType> result = alert.showAndWait();
 				if (result.get() == ButtonType.OK){
-					file.removeAnimalFromFile(Integer.parseInt(animalID));
+					Main.getConnection().deleteAnimal("Adoption", Integer.parseInt(animalID));
 					
 					Alert confirmation = new Alert(AlertType.INFORMATION);
 					confirmation.setHeaderText(null);
@@ -313,9 +310,6 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 				
 				clear();
 			}
-			
-		} catch (NumberFormatException | IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
