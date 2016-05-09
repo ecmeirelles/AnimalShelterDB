@@ -1,6 +1,7 @@
 package controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import application.AnimalAdoptionView;
@@ -19,6 +20,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.Alert.AlertType;
 import model.Animal;
+import model.Person;
 
 public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 	AnimalAdoptionView animalAdoptionView;
@@ -400,22 +402,24 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 		}
 			
 		else {
-			try {
-				file.writeInFile("InterestAdopting.txt", personName + "\t" + personTelephone + "\t" + personEmail + "\t" + personAddress);
+			Person person = new Person();
+			person.setPersonName(personName);
+			person.setPersonAddress(personAddress);
+			person.setPersonEmail(personEmail);
+			person.setPersonPhone(personTelephone);
+			
+			ArrayList<Integer> id = Main.getConnection().getAdoptionIds();
+			Main.getConnection().addPerson(person, id.get(0));
 							
-				Alert alert = new Alert(AlertType.INFORMATION);
-				alert.setHeaderText(null);
-				alert.setContentText("Person added successfully!");
-				alert.showAndWait();
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setHeaderText(null);
+			alert.setContentText("Person added successfully!");
+			alert.showAndWait();
 				
-				animalAdoptionView.getPersonNameField().setText("");
-				animalAdoptionView.getPersonEmailField().setText("");
-				animalAdoptionView.getPersonTelephoneField().setText("");
-				animalAdoptionView.getPersonAddressField().setText("");
-
-			} catch(FileNotFoundException e) {
-				System.out.println("File couldn't be found");
-			}
+			animalAdoptionView.getPersonNameField().setText("");
+			animalAdoptionView.getPersonEmailField().setText("");
+			animalAdoptionView.getPersonTelephoneField().setText("");
+			animalAdoptionView.getPersonAddressField().setText("");
 		}	
 	}
 	

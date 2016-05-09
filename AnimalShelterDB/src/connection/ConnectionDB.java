@@ -835,7 +835,7 @@ public class ConnectionDB {
 				selectPerson.setInt(1, categoryIds.get(i));
 				ResultSet resultPerson = selectPerson.executeQuery();			
 				
-				if(resultPerson.next()) {
+				while(resultPerson.next()) {
 					Person person = new Person();
 					person.setPersonName(resultPerson.getString("personName"));
 					person.setPersonAddress(resultPerson.getString("personAddress"));
