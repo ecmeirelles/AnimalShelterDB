@@ -120,6 +120,7 @@ public class Main extends Application {
 			
 			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 		          public void handle(WindowEvent we) {
+		        	connection.closeConnection();
 		        	  
 		        	Alert alert = new Alert(AlertType.CONFIRMATION);
 		  			alert.setHeaderText(null);

@@ -29,6 +29,15 @@ public class ConnectionDB {
 		}	
 	}
 	
+	public void closeConnection() {
+		try {
+			connection.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void addPerson(Person person) {
 		try {
 			PreparedStatement insertPerson = connection.prepareStatement("INSERT INTO animal_shelter.person(idPerson, personName, personAddress, personPhone, personEmail)" 
