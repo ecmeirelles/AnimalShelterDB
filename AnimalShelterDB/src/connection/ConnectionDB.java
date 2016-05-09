@@ -276,97 +276,119 @@ public class ConnectionDB {
 		ObservableList<Animal> details = FXCollections.observableArrayList();
 		
 		try {
-			if(category.equalsIgnoreCase("Lost")) {
-				categoryIds = getLostIds();
-			}
-			
-			else if(category.equalsIgnoreCase("Found")) {
-				categoryIds = getFoundIds();
-			}
-			
-			else {
-				categoryIds = getAdoptionIds();
-			}
-			
-			for(int i =0; i < categoryIds.size(); i++) {
-				PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idCategory = ?;");
-				selectAnimal.setInt(1, categoryIds.get(i));
-				ResultSet resultAnimal = selectAnimal.executeQuery();			
+			if(category.equalsIgnoreCase("All")) {
+				PreparedStatement selectAnimals = connection.prepareStatement("SELECT * FROM animal_shelter.animal;");
+				ResultSet resultAnimals = selectAnimals.executeQuery();			
 				
-				if(resultAnimal.next()) {
+				while(resultAnimals.next()) {
 					Animal animal = new Animal();
-					String location = "", status = "";
-					boolean isChipped = false, isVaccinated = false, isNeutered = false, isReserved = false;
 					
-					animal.setAnimalId(resultAnimal.getInt("idAnimal"));
-					animal.setAnimalAge(resultAnimal.getInt("animalAge"));
-					animal.setAnimalType(resultAnimal.getString("animalType"));
-					animal.setAnimalColour(resultAnimal.getString("animalColour"));
-					animal.setAnimalGender(resultAnimal.getString("animalGender"));
-					animal.setAnimalDescription(resultAnimal.getString("animalDescription"));
-					animal.setAnimalName(resultAnimal.getString("animalName"));
-					animal.setAnimalBreed(resultAnimal.getString("animalBreed"));
-					
-					if(category.equalsIgnoreCase("Lost")) {
-						PreparedStatement selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ?;");
-						selectLost.setInt(1, categoryIds.get(i));
-						ResultSet resultLost = selectLost.executeQuery();
-						
-						if(resultLost.next()) {						
-							location = resultLost.getString("lostLocation");
-						}
-					}
-					
-					else if(category.equalsIgnoreCase("Found")) {
-						PreparedStatement selectFound = connection.prepareStatement("SELECT * FROM animal_shelter.found WHERE idCategory = ?;");
-						selectFound.setInt(1, categoryIds.get(i));
-						ResultSet resultFound = selectFound.executeQuery();
-						
-						if(resultFound.next()) {						
-							location = resultFound.getString("foundLocation");
-						}
-					}
-					
-					else {
-						PreparedStatement selectAdoption = connection.prepareStatement("SELECT * FROM animal_shelter.adoption WHERE idCategory = ?;");
-						selectAdoption.setInt(1, categoryIds.get(i));
-						ResultSet resultAdoption = selectAdoption.executeQuery();
-						
-						if(resultAdoption.next()) {						
-							isNeutered = resultAdoption.getBoolean("adoptionNeutered");
-							isVaccinated = resultAdoption.getBoolean("adoptionVaccinated");
-							isChipped = resultAdoption.getBoolean("adoptionChipped");
-							status = resultAdoption.getString("adoptionStatus");
-							isReserved = resultAdoption.getBoolean("adoptionReserved");
-						}
-					}
-						
-					PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ?;");
-					selectCategory.setInt(1, categoryIds.get(i));
-					ResultSet resultCategory = selectCategory.executeQuery();
-						
-					if(resultCategory.next()) {
-						if(category.equalsIgnoreCase("Lost")) {
-							Category animalCategory = new LostAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
-									searchPersonLinkedToAnimal(categoryIds.get(i)), location);
-							animal.setAnimalCategory(animalCategory);
-						}
-						
-						else if(category.equalsIgnoreCase("Found")) {
-							Category animalCategory = new FoundAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
-									searchPersonLinkedToAnimal(categoryIds.get(i)), location);
-							animal.setAnimalCategory(animalCategory);
-						}
-						
-						else {
-							Category animalCategory = new AnimalAdoption(null, null, isNeutered, isChipped, isVaccinated, status, isReserved);
-							animal.setAnimalCategory(animalCategory);
-						}
-					}		
+					animal.setAnimalId(resultAnimals.getInt("idAnimal"));
+					animal.setAnimalAge(resultAnimals.getInt("animalAge"));
+					animal.setAnimalType(resultAnimals.getString("animalType"));
+					animal.setAnimalColour(resultAnimals.getString("animalColour"));
+					animal.setAnimalGender(resultAnimals.getString("animalGender"));
+					animal.setAnimalDescription(resultAnimals.getString("animalDescription"));
+					animal.setAnimalName(resultAnimals.getString("animalName"));
+					animal.setAnimalBreed(resultAnimals.getString("animalBreed"));
 					
 					animalList.addAnimal(animal);
 				}
 			}
+			
+			else {
+				if(category.equalsIgnoreCase("Lost")) {
+					categoryIds = getLostIds();
+				}
+				
+				else if(category.equalsIgnoreCase("Found")) {
+					categoryIds = getFoundIds();
+				}
+				
+				else if(category.equalsIgnoreCase("Adoption")){
+					categoryIds = getAdoptionIds();
+				}
+				
+				for(int i =0; i < categoryIds.size(); i++) {
+					PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idCategory = ?;");
+					selectAnimal.setInt(1, categoryIds.get(i));
+					ResultSet resultAnimal = selectAnimal.executeQuery();			
+					
+					if(resultAnimal.next()) {
+						Animal animal = new Animal();
+						String location = "", status = "";
+						boolean isChipped = false, isVaccinated = false, isNeutered = false, isReserved = false;
+						
+						animal.setAnimalId(resultAnimal.getInt("idAnimal"));
+						animal.setAnimalAge(resultAnimal.getInt("animalAge"));
+						animal.setAnimalType(resultAnimal.getString("animalType"));
+						animal.setAnimalColour(resultAnimal.getString("animalColour"));
+						animal.setAnimalGender(resultAnimal.getString("animalGender"));
+						animal.setAnimalDescription(resultAnimal.getString("animalDescription"));
+						animal.setAnimalName(resultAnimal.getString("animalName"));
+						animal.setAnimalBreed(resultAnimal.getString("animalBreed"));
+						
+						if(category.equalsIgnoreCase("Lost")) {
+							PreparedStatement selectLost = connection.prepareStatement("SELECT * FROM animal_shelter.lost WHERE idCategory = ?;");
+							selectLost.setInt(1, categoryIds.get(i));
+							ResultSet resultLost = selectLost.executeQuery();
+							
+							if(resultLost.next()) {						
+								location = resultLost.getString("lostLocation");
+							}
+						}
+						
+						else if(category.equalsIgnoreCase("Found")) {
+							PreparedStatement selectFound = connection.prepareStatement("SELECT * FROM animal_shelter.found WHERE idCategory = ?;");
+							selectFound.setInt(1, categoryIds.get(i));
+							ResultSet resultFound = selectFound.executeQuery();
+							
+							if(resultFound.next()) {						
+								location = resultFound.getString("foundLocation");
+							}
+						}
+						
+						else {
+							PreparedStatement selectAdoption = connection.prepareStatement("SELECT * FROM animal_shelter.adoption WHERE idCategory = ?;");
+							selectAdoption.setInt(1, categoryIds.get(i));
+							ResultSet resultAdoption = selectAdoption.executeQuery();
+							
+							if(resultAdoption.next()) {						
+								isNeutered = resultAdoption.getBoolean("adoptionNeutered");
+								isVaccinated = resultAdoption.getBoolean("adoptionVaccinated");
+								isChipped = resultAdoption.getBoolean("adoptionChipped");
+								status = resultAdoption.getString("adoptionStatus");
+								isReserved = resultAdoption.getBoolean("adoptionReserved");
+							}
+						}
+							
+						PreparedStatement selectCategory = connection.prepareStatement("SELECT * FROM animal_shelter.category WHERE idCategory = ?;");
+						selectCategory.setInt(1, categoryIds.get(i));
+						ResultSet resultCategory = selectCategory.executeQuery();
+							
+						if(resultCategory.next()) {
+							if(category.equalsIgnoreCase("Lost")) {
+								Category animalCategory = new LostAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
+										searchPersonLinkedToAnimal(categoryIds.get(i)), location);
+								animal.setAnimalCategory(animalCategory);
+							}
+							
+							else if(category.equalsIgnoreCase("Found")) {
+								Category animalCategory = new FoundAnimal(LocalDate.parse(resultCategory.getDate("categoryDate").toString()), 
+										searchPersonLinkedToAnimal(categoryIds.get(i)), location);
+								animal.setAnimalCategory(animalCategory);
+							}
+							
+							else {
+								Category animalCategory = new AnimalAdoption(null, null, isNeutered, isChipped, isVaccinated, status, isReserved);
+								animal.setAnimalCategory(animalCategory);
+							}
+						}		
+						
+						animalList.addAnimal(animal);
+					}
+				}
+			}		
 			
 			details.addAll(animalList.getAnimalList());
 			
@@ -1002,5 +1024,34 @@ public class ConnectionDB {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}	
+	}
+	
+	public ArrayList<Person> getPeople() {
+		ArrayList<Person> peopleList = new ArrayList<>();
+		ArrayList<Integer> categoryIds = new ArrayList<>();
+		
+		try {
+			categoryIds = getAdoptionIds();
+			
+			for(int i =0; i < categoryIds.size(); i++) {
+				PreparedStatement selectPerson = connection.prepareStatement("SELECT * FROM animal_shelter.person;");
+				ResultSet resultPerson = selectPerson.executeQuery();			
+				
+				while(resultPerson.next()) {
+					Person person = new Person();
+					person.setPersonName(resultPerson.getString("personName"));
+					person.setPersonAddress(resultPerson.getString("personAddress"));
+					person.setPersonEmail(resultPerson.getString("personEmail"));
+					person.setPersonPhone(resultPerson.getString("personPhone"));
+					
+					peopleList.add(person);
+				}
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return peopleList;
 	}
 }
