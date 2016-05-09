@@ -9,7 +9,6 @@ import application.Main;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -486,77 +485,68 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 		}
 	}
 	
-	public void generateReport() {
-		ObservableList<Animal> details = FXCollections.observableArrayList();
+	public void generateReport() {		
+		if(animalStatus == null) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText(null);
+			alert.setContentText("Status must not be empty");
+			alert.showAndWait();
+		}
 		
-		try {
-			if(animalStatus == null) {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText(null);
-				alert.setContentText("Status must not be empty");
-				alert.showAndWait();
-			}
+		else if(animalAdoptionView.getOrganizationField().getValue() == null) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setHeaderText(null);
+			alert.setContentText("Choose an organization mode");
+			alert.showAndWait();
+		}
+		
+		else {
+			ObservableList<Animal> details = Main.getConnection().getAdoptionAnimalsToReport(animalType, animalStatus, animalAdoptionView.getClassificationField().getValue());
 			
-			else if(animalAdoptionView.getOrganizationField().getValue() == null) {
+			if(details.isEmpty()) {
+				animalAdoptionView.getAnimalDetails().setVisible(false);
+				
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setHeaderText(null);
-				alert.setContentText("Choose an organization mode");
+				alert.setContentText("No animal found!");
 				alert.showAndWait();
 			}
 			
 			else {
-				animalList = file.getAdoptionListToReport(animalType, animalStatus, animalAdoptionView.getClassificationField().getValue());
+				animalAdoptionView.getAgeColumn().setSortType(TableColumn.SortType.ASCENDING);
+				animalAdoptionView.getNameColumn().setSortType(TableColumn.SortType.ASCENDING);
+				animalAdoptionView.getReservedColumn().setSortType(TableColumn.SortType.DESCENDING);
 				
-				if(animalList.getAnimalList().size() == 0) {
-					animalAdoptionView.getAnimalDetails().setVisible(false);
-					
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setHeaderText(null);
-					alert.setContentText("No animal found!");
-					alert.showAndWait();
-				}
+				animalAdoptionView.getReservedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isReserved()));
+				animalAdoptionView.getIdColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalId()));
+				animalAdoptionView.getNameColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalName()));
+				animalAdoptionView.getTypeColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalType()));
+				animalAdoptionView.getAgeColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalAge()));
+				animalAdoptionView.getBreedColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalBreed()));
+				animalAdoptionView.getColourColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalColour()));
+				animalAdoptionView.getGenderColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalGender()));
+				animalAdoptionView.getDescriptionColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalDescription()));
+				animalAdoptionView.getChippedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isChipped()));
+				animalAdoptionView.getNeuteredColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isNeutered()));
+				animalAdoptionView.getVaccinatedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isVaccinated()));
+				animalAdoptionView.getStatusColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getStatus()));
+				
+				animalAdoptionView.getAnimalDetails().setItems(details);
+				
+				if(animalAdoptionView.getOrganizationField().getValue().equalsIgnoreCase("Age")) {
+					animalAdoptionView.getAnimalDetails().getSortOrder().add(animalAdoptionView.getAgeColumn());
+			    }
+				
+				else if(animalAdoptionView.getOrganizationField().getValue().equalsIgnoreCase("Name")) {
+					animalAdoptionView.getAnimalDetails().getSortOrder().add(animalAdoptionView.getNameColumn());
+			    }
 				
 				else {
-					details.addAll(animalList.getAnimalList());
-					
-					animalAdoptionView.getAgeColumn().setSortType(TableColumn.SortType.ASCENDING);
-					animalAdoptionView.getNameColumn().setSortType(TableColumn.SortType.ASCENDING);
-					animalAdoptionView.getReservedColumn().setSortType(TableColumn.SortType.DESCENDING);
-					
-					animalAdoptionView.getReservedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isReserved()));
-					animalAdoptionView.getIdColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalId()));
-					animalAdoptionView.getNameColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalName()));
-					animalAdoptionView.getTypeColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalType()));
-					animalAdoptionView.getAgeColumn().setCellValueFactory(data -> new ReadOnlyIntegerWrapper(data.getValue().getAnimalAge()));
-					animalAdoptionView.getBreedColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalBreed()));
-					animalAdoptionView.getColourColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalColour()));
-					animalAdoptionView.getGenderColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalGender()));
-					animalAdoptionView.getDescriptionColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalDescription()));
-					animalAdoptionView.getChippedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isChipped()));
-					animalAdoptionView.getNeuteredColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isNeutered()));
-					animalAdoptionView.getVaccinatedColumn().setCellValueFactory(data -> new ReadOnlyBooleanWrapper(data.getValue().getAnimalCategory().isVaccinated()));
-					animalAdoptionView.getStatusColumn().setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getAnimalCategory().getStatus()));
-					
-					animalAdoptionView.getAnimalDetails().setItems(details);
-					
-					if(animalAdoptionView.getOrganizationField().getValue().equalsIgnoreCase("Age")) {
-						animalAdoptionView.getAnimalDetails().getSortOrder().add(animalAdoptionView.getAgeColumn());
-				    }
-					
-					else if(animalAdoptionView.getOrganizationField().getValue().equalsIgnoreCase("Name")) {
-						animalAdoptionView.getAnimalDetails().getSortOrder().add(animalAdoptionView.getNameColumn());
-				    }
-					
-					else {
-						animalAdoptionView.getAnimalDetails().getSortOrder().add(animalAdoptionView.getReservedColumn());
-				    }
-					
-					animalAdoptionView.getAnimalDetails().setVisible(true);
-				}
+					animalAdoptionView.getAnimalDetails().getSortOrder().add(animalAdoptionView.getReservedColumn());
+			    }
+				
+				animalAdoptionView.getAnimalDetails().setVisible(true);
 			}
-		    
-		} catch (IOException e) {
-			System.out.println("I/O Problem");
 		}
 	}
 }
