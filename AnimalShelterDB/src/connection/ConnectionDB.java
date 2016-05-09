@@ -181,4 +181,23 @@ public class ConnectionDB {
 			e.printStackTrace();
 		}
 	}
+	
+	public boolean searchAnimalId(int newId) {
+		boolean found = false;
+		
+		try {
+			PreparedStatement selectAnimal = connection.prepareStatement("SELECT * FROM animal_shelter.animal WHERE idAnimal = ?;");
+			selectAnimal.setInt(1, newId);
+			ResultSet resultAnimal = selectAnimal.executeQuery();			
+			
+			if(resultAnimal.next()) {
+				found = true;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return found;
+	}
 }

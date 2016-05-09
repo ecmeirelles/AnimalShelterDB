@@ -1,10 +1,8 @@
 package application;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import connection.ConnectionDB;
-import controller.ShelterFile;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -20,13 +18,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import model.AnimalList;
 
 public class Main extends Application {
 	private static Stage stage;
 	private static Scene scene;
 	private static ConnectionDB connection;
-	private ShelterFile file = new ShelterFile();
 
 	private BorderPane root;
 	

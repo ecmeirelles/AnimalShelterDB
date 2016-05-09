@@ -101,8 +101,7 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
 		}
 			
 		else {
-			// TODO: Conferir se id ja existe
-			if(!animalList.searchAnimal(Integer.parseInt(animalID))) {
+			if(!Main.getConnection().searchAnimalId(Integer.parseInt(animalID))) {
 				RadioButton gender = (RadioButton) animalGender;
 				
 				Animal animal = new Animal();
