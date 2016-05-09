@@ -137,6 +137,7 @@ public class LostAnimalController extends ActionEvent implements EventHandler<Ac
             		animal.setAnimalCategory(category);
             		
             		connection.addPerson(owner);
+            		connection.addAnimal(animal, "Lost");
 					
 					Alert alert = new Alert(AlertType.INFORMATION);
 					alert.setHeaderText(null);
