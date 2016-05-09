@@ -518,11 +518,11 @@ public class ConnectionDB {
 					ResultSet resultAdoption = selectAdoption.executeQuery();
 					
 					if(resultAdoption.next()) {						
-						isNeutered = resultAdoption.getBoolean("animalNeutered");
-						isVaccinated = resultAdoption.getBoolean("animalVaccinated");
-						isChipped = resultAdoption.getBoolean("animalChipped");
-						status = resultAdoption.getString("animalStatus");
-						isReserved = resultAdoption.getBoolean("animalReserved");
+						isNeutered = resultAdoption.getBoolean("adoptionNeutered");
+						isVaccinated = resultAdoption.getBoolean("adoptionVaccinated");
+						isChipped = resultAdoption.getBoolean("adoptionChipped");
+						status = resultAdoption.getString("adoptionStatus");
+						isReserved = resultAdoption.getBoolean("adoptionReserved");
 					}
 					
 					else {

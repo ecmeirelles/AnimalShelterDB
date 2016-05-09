@@ -176,89 +176,83 @@ public class AnimalAdoptionController implements EventHandler<ActionEvent>{
 		}
 		
 		else {
-			try {
-				Animal animal = Main.getConnection().searchAnimalById("Found", Integer.parseInt(animalAdoptionView.getAnimalSearchField().getText()));
+			Animal animal = Main.getConnection().searchAnimalById("Adoption", Integer.parseInt(animalAdoptionView.getAnimalSearchField().getText()));
+			
+			if(animal != null) {
+				animalAdoptionView.getAnimalIdName().setVisible(true);
+				animalAdoptionView.getAnimalType().setVisible(true);
+				animalAdoptionView.getAnimalBreedAge().setVisible(true);
+				animalAdoptionView.getAnimalGenderColour().setVisible(true);
+				animalAdoptionView.getAnimalDescriptionLabel().setVisible(true);
+				animalAdoptionView.getAnimalDescriptionArea().setVisible(true);
+				animalAdoptionView.getNeuteredChipped().setVisible(true);
+				animalAdoptionView.getVaccinatedStatus().setVisible(true);
+				animalAdoptionView.getActionButtons().setVisible(true);
 				
-				if(animal != null) {
-					animalAdoptionView.getAnimalIdName().setVisible(true);
-					animalAdoptionView.getAnimalType().setVisible(true);
-					animalAdoptionView.getAnimalBreedAge().setVisible(true);
-					animalAdoptionView.getAnimalGenderColour().setVisible(true);
-					animalAdoptionView.getAnimalDescriptionLabel().setVisible(true);
-					animalAdoptionView.getAnimalDescriptionArea().setVisible(true);
-					animalAdoptionView.getNeuteredChipped().setVisible(true);
-					animalAdoptionView.getVaccinatedStatus().setVisible(true);
-					animalAdoptionView.getActionButtons().setVisible(true);
-					
-					String animalGender = animalList.getAnimalList().get(index).getAnimalGender();
-					boolean isNeutered = animalList.getAnimalList().get(index).getAnimalCategory().isNeutered();
-					boolean isChipped = animalList.getAnimalList().get(index).getAnimalCategory().isChipped();
-					boolean isVaccinated = animalList.getAnimalList().get(index).getAnimalCategory().isVaccinated();
-								
-					animalAdoptionView.getAnimalIdField().setText(String.valueOf(animalList.getAnimalList().get(index).getAnimalId()));
-					animalAdoptionView.getAnimalNameField().setText(animalList.getAnimalList().get(index).getAnimalName());
-					animalAdoptionView.getAnimalTypeField().setValue(animalList.getAnimalList().get(index).getAnimalType());
-					animalAdoptionView.getAnimalBreedField().setText(animalList.getAnimalList().get(index).getAnimalBreed());
-					animalAdoptionView.getAnimalAgeField().setText(String.valueOf(animalList.getAnimalList().get(index).getAnimalAge()));
-					animalAdoptionView.getAnimalColourField().setText(animalList.getAnimalList().get(index).getAnimalColour());
-					animalAdoptionView.getAnimalDescriptionArea().setText(animalList.getAnimalList().get(index).getAnimalDescription());
-					animalAdoptionView.getStatusField().setValue(animalList.getAnimalList().get(index).getAnimalCategory().getStatus());
-					
-					if(animalGender.equalsIgnoreCase("Female")) {
-						animalAdoptionView.getFemaleAnimal().setSelected(true);
-						animalAdoptionView.getMaleAnimal().setSelected(false);
-					}
-					
-					else {
-						animalAdoptionView.getFemaleAnimal().setSelected(false);
-						animalAdoptionView.getMaleAnimal().setSelected(true);
-					}
-					
-					if(isChipped) {
-						animalAdoptionView.getYesChipped().setSelected(true);
-						animalAdoptionView.getNoChipped().setSelected(false);
-					}
-					
-					else {
-						animalAdoptionView.getNoChipped().setSelected(true);
-						animalAdoptionView.getYesChipped().setSelected(false);
-					}
-					
-					if(isNeutered) {
-						animalAdoptionView.getYesNeutered().setSelected(true);
-						animalAdoptionView.getNoNeutered().setSelected(false);
-					}
-					
-					else {
-						animalAdoptionView.getNoNeutered().setSelected(true);
-						animalAdoptionView.getYesNeutered().setSelected(false);
-					}
-					
-					if(isVaccinated) {
-						animalAdoptionView.getYesVaccinated().setSelected(true);
-						animalAdoptionView.getNoVaccinated().setSelected(false);
-					}
-					
-					else {
-						animalAdoptionView.getNoVaccinated().setSelected(true);
-						animalAdoptionView.getYesVaccinated().setSelected(false);
-					}
-					
-					animalAdoptionView.getAnimalSearchField().setText("");
+				String animalGender = animal.getAnimalGender();
+				boolean isNeutered = animal.getAnimalCategory().isNeutered();
+				boolean isChipped = animal.getAnimalCategory().isChipped();
+				boolean isVaccinated = animal.getAnimalCategory().isVaccinated();
+							
+				animalAdoptionView.getAnimalIdField().setText(String.valueOf(animal.getAnimalId()));
+				animalAdoptionView.getAnimalNameField().setText(animal.getAnimalName());
+				animalAdoptionView.getAnimalTypeField().setValue(animal.getAnimalType());
+				animalAdoptionView.getAnimalBreedField().setText(animal.getAnimalBreed());
+				animalAdoptionView.getAnimalAgeField().setText(String.valueOf(animal.getAnimalAge()));
+				animalAdoptionView.getAnimalColourField().setText(animal.getAnimalColour());
+				animalAdoptionView.getAnimalDescriptionArea().setText(animal.getAnimalDescription());
+				animalAdoptionView.getStatusField().setValue(animal.getAnimalCategory().getStatus());
+				
+				if(animalGender.equalsIgnoreCase("Female")) {
+					animalAdoptionView.getFemaleAnimal().setSelected(true);
+					animalAdoptionView.getMaleAnimal().setSelected(false);
 				}
 				
 				else {
-					clear();
-					
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setHeaderText(null);
-					alert.setContentText("Animal couldn't be found!");
-					alert.showAndWait();
+					animalAdoptionView.getFemaleAnimal().setSelected(false);
+					animalAdoptionView.getMaleAnimal().setSelected(true);
 				}
-			} catch(FileNotFoundException e) {
-				System.out.println("File couldn't be found");
-			} catch(IOException e) {
-				System.out.println("I/O Problem");
+				
+				if(isChipped) {
+					animalAdoptionView.getYesChipped().setSelected(true);
+					animalAdoptionView.getNoChipped().setSelected(false);
+				}
+				
+				else {
+					animalAdoptionView.getNoChipped().setSelected(true);
+					animalAdoptionView.getYesChipped().setSelected(false);
+				}
+				
+				if(isNeutered) {
+					animalAdoptionView.getYesNeutered().setSelected(true);
+					animalAdoptionView.getNoNeutered().setSelected(false);
+				}
+				
+				else {
+					animalAdoptionView.getNoNeutered().setSelected(true);
+					animalAdoptionView.getYesNeutered().setSelected(false);
+				}
+				
+				if(isVaccinated) {
+					animalAdoptionView.getYesVaccinated().setSelected(true);
+					animalAdoptionView.getNoVaccinated().setSelected(false);
+				}
+				
+				else {
+					animalAdoptionView.getNoVaccinated().setSelected(true);
+					animalAdoptionView.getYesVaccinated().setSelected(false);
+				}
+				
+				animalAdoptionView.getAnimalSearchField().setText("");
+			}
+			
+			else {
+				clear();
+					
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setHeaderText(null);
+				alert.setContentText("Animal couldn't be found!");
+				alert.showAndWait();
 			}
 		}
 	}
